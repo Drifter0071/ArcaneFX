@@ -4,7 +4,7 @@
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hollow Purple - Ultimate Technique</title>
+        <title>Hollow Purple - Malevolent Shrine</title>
         <style>
                 * {
                         margin: 0;
@@ -194,176 +194,198 @@
         </div>
 
         <script type="module">
-                import { ArcaneFX, SEQUENCE_COMMANDS as CMD } from './ArcaneFX.js';
+                import { ArcaneFX, SEQUENCE_COMMANDS as CMD, convertAbsoluteSequence } from './ArcaneFX.js';
 
                 const fx = new ArcaneFX();
                 const btn = document.getElementById('activate-btn');
                 const shrineBtn = document.getElementById('activate-shrine-btn');
                 const title = document.getElementById('title');
 
-                // BLUE ORB - Glowing sphere with intense particles
+                // BLUE ORB - LAPSE: BLUE (Maximum Attraction)
                 fx.registerEffect('blue_orb', function (inst) {
                         inst.emitter = function () {
-                                // Core orb glow
-                                for (let i = 0; i < 30; i++) {
-                                        const angle = (Math.PI * 2 * i) / 30;
-                                        const radius = 40 + Math.sin(inst.life * 0.2) * 10;
+                                // Core orb glow - Unstable Blue
+                                for (let i = 0; i < 5; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const radius = Math.random() * 40;
                                         inst.spawn({
                                                 x: Math.cos(angle) * radius,
                                                 y: Math.sin(angle) * radius,
-                                                vx: 0,
-                                                vy: 0,
-                                                life: 20,
-                                                size: 25,
+                                                vx: 0, vy: 0,
+                                                life: 10,
+                                                size: 30 + Math.random() * 20,
                                                 color: '#00d4ff'
                                         });
                                 }
-                                // Intense particle attraction
-                                for (let i = 0; i < 20; i++) {
+                                // DEBRIS SUCTION - The world being pulled in
+                                for (let i = 0; i < 15; i++) {
                                         const angle = Math.random() * Math.PI * 2;
-                                        const distance = 200 + Math.random() * 300;
+                                        const dist = 400 + Math.random() * 400;
+                                        const speed = 25 + Math.random() * 10;
                                         inst.spawn({
-                                                x: Math.cos(angle) * distance,
-                                                y: Math.sin(angle) * distance,
-                                                vx: -Math.cos(angle) * 10,
-                                                vy: -Math.sin(angle) * 10,
-                                                life: 50,
-                                                size: 8 + Math.random() * 12,
-                                                color: Math.random() > 0.3 ? '#00d4ff' : '#ffffff',
-                                                shrink: true
+                                                x: Math.cos(angle) * dist,
+                                                y: Math.sin(angle) * dist,
+                                                vx: -Math.cos(angle) * speed,
+                                                vy: -Math.sin(angle) * speed,
+                                                life: 40,
+                                                size: 4 + Math.random() * 8,
+                                                color: Math.random() > 0.5 ? '#00d4ff' : '#ffffff',
+                                                length: 40, width: 2, type: 'line', // Speed lines
+                                                rotation: angle
+                                        });
+                                }
+                                // Orbiting debris
+                                for (let i = 0; i < 5; i++) {
+                                        const angle = (inst.life * 0.1) + (i * Math.PI * 2 / 5);
+                                        const r = 100 + Math.sin(inst.life * 0.2) * 20;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * r,
+                                                y: Math.sin(angle) * r,
+                                                vx: 0, vy: 0,
+                                                life: 5, size: 8, color: '#fff'
                                         });
                                 }
                         };
                 });
 
-                // RED ORB - Glowing sphere with intense particles
+                // RED ORB - REVERSAL: RED (Maximum Repulsion)
                 fx.registerEffect('red_orb', function (inst) {
                         inst.emitter = function () {
-                                // Core orb glow
-                                for (let i = 0; i < 30; i++) {
-                                        const angle = (Math.PI * 2 * i) / 30;
-                                        const radius = 40 + Math.sin(inst.life * 0.2) * 10;
+                                // Core orb glow - Violent Red
+                                for (let i = 0; i < 5; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const radius = Math.random() * 40;
                                         inst.spawn({
                                                 x: Math.cos(angle) * radius,
                                                 y: Math.sin(angle) * radius,
-                                                vx: 0,
-                                                vy: 0,
-                                                life: 20,
-                                                size: 25,
+                                                vx: 0, vy: 0,
+                                                life: 10,
+                                                size: 30 + Math.random() * 20,
                                                 color: '#ff1744'
                                         });
                                 }
-                                // Intense particle repulsion
-                                for (let i = 0; i < 20; i++) {
+                                // SHOCKWAVE REPULSION - Blasting everything away
+                                for (let i = 0; i < 15; i++) {
                                         const angle = Math.random() * Math.PI * 2;
-                                        const distance = 200 + Math.random() * 300;
+                                        const speed = 20 + Math.random() * 15;
                                         inst.spawn({
-                                                x: Math.cos(angle) * distance,
-                                                y: Math.sin(angle) * distance,
-                                                vx: -Math.cos(angle) * 10,
-                                                vy: -Math.sin(angle) * 10,
-                                                life: 50,
-                                                size: 8 + Math.random() * 12,
-                                                color: Math.random() > 0.3 ? '#ff1744' : '#ffffff',
-                                                shrink: true
-                                        });
-                                }
-                        };
-                });
-
-                // PURPLE ORB - INFINITE POWER
-                fx.registerEffect('purple_orb', function (inst) {
-                        inst.emitter = function () {
-                                // Massive glowing core
-                                for (let i = 0; i < 50; i++) {
-                                        const angle = (Math.PI * 2 * i) / 50;
-                                        const radius = 60 + Math.sin(inst.life * 0.15) * 20;
-                                        inst.spawn({
-                                                x: Math.cos(angle) * radius,
-                                                y: Math.sin(angle) * radius,
-                                                vx: 0,
-                                                vy: 0,
-                                                life: 15,
-                                                size: 35,
-                                                color: '#8b00ff'
-                                        });
-                                }
-                                // Inner white core
-                                for (let i = 0; i < 20; i++) {
-                                        const angle = (Math.PI * 2 * i) / 20;
-                                        const radius = 20;
-                                        inst.spawn({
-                                                x: Math.cos(angle) * radius,
-                                                y: Math.sin(angle) * radius,
-                                                vx: 0,
-                                                vy: 0,
-                                                life: 15,
-                                                size: 25,
-                                                color: '#ffffff'
-                                        });
-                                }
-                                // Energy crackling
-                                for (let i = 0; i < 30; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const distance = Math.random() * 150;
-                                        inst.spawn({
-                                                x: Math.cos(angle) * distance,
-                                                y: Math.sin(angle) * distance,
-                                                vx: (Math.random() - 0.5) * 8,
-                                                vy: (Math.random() - 0.5) * 8,
-                                                life: 30,
-                                                size: 10 + Math.random() * 15,
-                                                color: Math.random() > 0.5 ? '#8b00ff' : '#ffffff'
-                                        });
-                                }
-                        };
-                });
-
-                // PARTICLE STORM
-                fx.registerEffect('particle_storm', function (inst) {
-                        inst.emitter = function () {
-                                for (let i = 0; i < 50; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const distance = Math.random() * 500;
-                                        inst.spawn({
-                                                x: Math.cos(angle) * distance,
-                                                y: Math.sin(angle) * distance,
-                                                vx: -Math.cos(angle) * 15,
-                                                vy: -Math.sin(angle) * 15,
+                                                x: 0, y: 0,
+                                                vx: Math.cos(angle) * speed,
+                                                vy: Math.sin(angle) * speed,
                                                 life: 40,
                                                 size: 5 + Math.random() * 10,
-                                                color: ['#8b00ff', '#ff1744', '#00d4ff', '#ffffff'][Math.floor(Math.random() * 4)],
-                                                shrink: true
+                                                color: Math.random() > 0.5 ? '#ff1744' : '#000000',
+                                                length: 30, width: 3, type: 'line',
+                                                rotation: angle
+                                        });
+                                }
+                                // Gravity distortion rings
+                                if (inst.life % 5 === 0) {
+                                        inst.spawn({
+                                                x: 0, y: 0, vx: 0, vy: 0,
+                                                life: 20, size: 10, color: '#ff1744',
+                                                type: 'ring', // Conceptual, using particles for now
+                                                behavior: (p) => {
+                                                        p.size += 5;
+                                                        p.life--;
+                                                }
                                         });
                                 }
                         };
                 });
 
-                // PURPLE BEAM - Devastating column
-                fx.registerEffect('purple_beam', function (inst) {
+                // PURPLE ORB - HOLLOW PURPLE (Imaginary Mass)
+                fx.registerEffect('purple_orb', function (inst) {
                         inst.emitter = function () {
-                                // Main beam core
-                                for (let i = 0; i < 40; i++) {
+                                // The Singularity
+                                for (let i = 0; i < 10; i++) {
                                         inst.spawn({
-                                                x: i * 25,
-                                                y: (Math.random() - 0.5) * 150,
-                                                vx: 35,
-                                                vy: (Math.random() - 0.5) * 5,
-                                                life: 50,
-                                                size: 30 + Math.random() * 30,
+                                                x: (Math.random() - 0.5) * 40,
+                                                y: (Math.random() - 0.5) * 40,
+                                                vx: 0, vy: 0,
+                                                life: 5,
+                                                size: 60 + Math.random() * 20,
                                                 color: '#8b00ff'
                                         });
                                 }
-                                // White inner beam
-                                for (let i = 0; i < 30; i++) {
+                                // White void center
+                                inst.spawn({
+                                        x: 0, y: 0, vx: 0, vy: 0, life: 5, size: 40, color: '#fff'
+                                });
+
+                                // Reality Cracks (Lightning)
+                                for (let i = 0; i < 3; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const dist = 60;
                                         inst.spawn({
-                                                x: i * 25,
-                                                y: (Math.random() - 0.5) * 80,
-                                                vx: 35,
-                                                vy: (Math.random() - 0.5) * 3,
-                                                life: 50,
-                                                size: 20 + Math.random() * 20,
+                                                x: Math.cos(angle) * dist,
+                                                y: Math.sin(angle) * dist,
+                                                vx: 0, vy: 0,
+                                                life: 5,
+                                                size: 2,
+                                                length: 100, width: 3,
+                                                color: '#d8b4fe',
+                                                type: 'lightning',
+                                                points: 5
+                                        });
+                                }
+                        };
+                });
+
+                // PARTICLE STORM - Chaos Environment
+                fx.registerEffect('particle_storm', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 5; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const distance = 200 + Math.random() * 600;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * distance,
+                                                y: Math.sin(angle) * distance,
+                                                vx: (Math.random() - 0.5) * 20,
+                                                vy: (Math.random() - 0.5) * 20,
+                                                life: 20,
+                                                size: 2 + Math.random() * 4,
+                                                color: ['#8b00ff', '#000000', '#ffffff'][Math.floor(Math.random() * 3)],
+                                        });
+                                }
+                        };
+                });
+
+                // PURPLE BEAM - ERASURE
+                fx.registerEffect('purple_beam', function (inst) {
+                        inst.emitter = function () {
+                                // Main Beam Body - Massive
+                                for (let i = 0; i < 20; i++) {
+                                        inst.spawn({
+                                                x: i * 40, // Trail behind
+                                                y: (Math.random() - 0.5) * 200,
+                                                vx: 50, // Fast forward
+                                                vy: 0,
+                                                life: 30,
+                                                size: 80 + Math.random() * 40,
+                                                color: '#8b00ff'
+                                        });
+                                }
+                                // Core White Beam
+                                for (let i = 0; i < 20; i++) {
+                                        inst.spawn({
+                                                x: i * 40,
+                                                y: (Math.random() - 0.5) * 50,
+                                                vx: 50,
+                                                vy: 0,
+                                                life: 30,
+                                                size: 30 + Math.random() * 20,
                                                 color: '#ffffff'
+                                        });
+                                }
+                                // Debris being erased
+                                for (let i = 0; i < 10; i++) {
+                                        inst.spawn({
+                                                x: 200 + Math.random() * 200,
+                                                y: (Math.random() - 0.5) * 300,
+                                                vx: 40, vy: (Math.random() - 0.5) * 20,
+                                                life: 20, size: 5, color: '#000',
+                                                type: 'triangle'
                                         });
                                 }
                         };
@@ -522,129 +544,88 @@
                         };
                 });
 
-                // INSANE Hollow Purple Sequence
-                function activateHollowPurple() {
-                        btn.classList.add('hidden');
-                        shrineBtn.classList.add('hidden');
-                        title.classList.add('visible');
-
-                        const sequence = [
-                                // Phase 1: Blue Orb Manifests (Amplification)
-                                [CMD.VFX, 0, 'blue_orb', '30%', '50%', {}, 'blue'],
-                                [CMD.VFX, 0, 'particle_storm', '30%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 100, 'rgba(0, 212, 255, 0.4)', 'none'],
-
-                                // Phase 2: Red Orb Manifests (Reversal)
-                                [CMD.VFX, 400, 'red_orb', '70%', '50%', {}, 'red'],
-                                [CMD.VFX, 400, 'particle_storm', '70%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 500, 'rgba(255, 23, 68, 0.4)', 'none'],
-
-                                // Phase 3: Convergence
-                                [CMD.MOVE_VFX, 800, 'blue', '50%', '50%', 600],
-                                [CMD.MOVE_VFX, 800, 'red', '50%', '50%', 600],
-                                [CMD.VFX, 800, 'energy_tornado', '50%', '50%', {}],
-                                [CMD.VFX, 1000, 'purple_lightning', '50%', '50%', {}], // New lightning
-
-                                // Phase 4: SINGULARITY FORMING
-                                [CMD.CLEAR_VFX, 1400, 'blue'],
-                                [CMD.CLEAR_VFX, 1400, 'red'],
-                                [CMD.IMPACT_FRAME, 1400, 'rgba(255, 255, 255, 1)', 'shake'],
-                                [CMD.VFX, 1400, 'black_hole_core', '50%', '50%', {}], // New black hole
-                                [CMD.VFX, 1400, 'apocalypse', '50%', '50%', {}],
-
-                                // Phase 5: SILENCE BEFORE DESTRUCTION
-                                [CMD.IMPACT_FRAME, 1450, 'rgba(0, 0, 0, 1)', 'invert'],
-                                [CMD.WAIT, 200],
-
-                                // Phase 6: HOLLOW PURPLE ACTIVATION
-                                [CMD.IMPACT_FRAME, 1650, 'rgba(139, 0, 255, 1)', 'chromatic'],
-                                [CMD.VFX, 1650, 'purple_orb', '50%', '50%', {}, 'purple'],
-                                [CMD.VFX, 1650, 'shockwave_helix', '50%', '50%', {}], // New helix
-                                [CMD.VFX, 1650, 'purple_lightning', '50%', '50%', {}],
-
-                                // Phase 7: CHARGE UP
-                                [CMD.VFX, 2000, 'distortion_wave', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 2000, 'rgba(139, 0, 255, 0.5)', 'rumble'],
-                                [CMD.VFX, 2200, 'black_hole_core', '50%', '50%', {}], // More density
-
-                                // Phase 8: RELEASE THE BEAM
-                                [CMD.IMPACT_FRAME, 2500, 'rgba(255, 255, 255, 1)', 'shake'],
-                                [CMD.VFX, 2500, 'purple_beam', '50%', '50%', {}, 'beam'],
-                                [CMD.MOVE_VFX, 2550, 'beam', '120%', '50%', 1000], // Shoot off screen
-                                [CMD.MOVE_VFX, 2550, 'purple', '120%', '50%', 1000], // Orb follows
-
-                                // Phase 9: DESTRUCTION TRAIL
-                                [CMD.VFX, 2600, 'shockwave_helix', '60%', '50%', {}],
-                                [CMD.VFX, 2700, 'shockwave_helix', '80%', '50%', {}],
-                                [CMD.VFX, 2600, 'purple_lightning', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 2600, 'rgba(139, 0, 255, 0.8)', 'chromatic'],
-
-                                // Phase 10: SCREEN NUKE
-                                [CMD.IMPACT_FRAME, 3000, 'rgba(255, 255, 255, 1)', 'shake'],
-                                [CMD.VFX, 3000, 'apocalypse', '50%', '50%', {}],
-                                [CMD.VFX, 3000, 'apocalypse', '80%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 3100, 'rgba(0, 0, 0, 1)', 'invert'],
-
-                                // Phase 11: FADE
-                                [CMD.WAIT, 1000],
-                                [CMD.IMPACT_FRAME, 4500, 'transparent', 'none']
-                        ];
-
-                        fx.runSequence(sequence).then(function () {
-                                btn.classList.remove('hidden');
-                                shrineBtn.classList.remove('hidden');
-                                title.classList.remove('visible');
-                        });
-                }
-
                 // --- MALEVOLENT SHRINE EFFECTS ---
 
                 // SHRINE OUTLINE - The ominous structure
                 fx.registerEffect('shrine_outline', function (inst) {
                         inst.emitter = function () {
-                                // Torii Gate / Shrine Structure
-                                // Top bar
-                                for (let i = 0; i < 40; i++) {
-                                        inst.spawn({
-                                                x: (i - 20) * 15,
-                                                y: -150,
-                                                vx: 0, vy: 0,
-                                                life: 60, size: 8, color: '#8b0000',
-                                                type: 'triangle'
-                                        });
+                                // Torii Gate / Shrine Structure - More detailed
+                                const color = '#8b0000';
+                                const shadow = '#300000';
+
+                                // Main Roof
+                                for (let i = 0; i < 60; i++) {
+                                        const x = (i - 30) * 12;
+                                        const y = -180 + Math.abs(x) * 0.2; // Curved roof
+                                        inst.spawn({ x: x, y: y, vx: 0, vy: 0, life: 10, size: 10, color: color, type: 'triangle' });
                                 }
+
                                 // Pillars
-                                for (let i = 0; i < 30; i++) {
-                                        inst.spawn({ x: -200, y: -150 + i * 15, vx: 0, vy: 0, life: 60, size: 6, color: '#500000' });
-                                        inst.spawn({ x: 200, y: -150 + i * 15, vx: 0, vy: 0, life: 60, size: 6, color: '#500000' });
+                                for (let i = 0; i < 40; i++) {
+                                        inst.spawn({ x: -200, y: -150 + i * 10, vx: 0, vy: 0, life: 10, size: 8, color: shadow });
+                                        inst.spawn({ x: 200, y: -150 + i * 10, vx: 0, vy: 0, life: 10, size: 8, color: shadow });
+                                        inst.spawn({ x: -100, y: -120 + i * 10, vx: 0, vy: 0, life: 10, size: 6, color: shadow });
+                                        inst.spawn({ x: 100, y: -120 + i * 10, vx: 0, vy: 0, life: 10, size: 6, color: shadow });
                                 }
-                                // Eyes/Teeth particles
-                                if (Math.random() > 0.8) {
+
+                                // Skulls / Evil Aura
+                                if (Math.random() > 0.5) {
                                         inst.spawn({
-                                                x: (Math.random() - 0.5) * 300,
-                                                y: (Math.random() - 0.5) * 300,
+                                                x: (Math.random() - 0.5) * 500,
+                                                y: 100 + (Math.random() - 0.5) * 100,
                                                 vx: 0, vy: -2,
-                                                life: 40, size: 4, color: '#ff0000'
+                                                life: 30, size: 4, color: '#ff0000'
                                         });
                                 }
                         };
                 });
 
-                // CLEAVE - Single powerful slash
+                // CLEAVE - Single powerful slash (Adjusted to be invisible then appear)
                 fx.registerEffect('cleave_slash', function (inst) {
                         inst.emitter = function () {
-                                const angle = Math.PI / 4; // Diagonal
-                                for (let i = 0; i < 20; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                // Instant slash line
+                                for (let i = 0; i < 5; i++) {
                                         inst.spawn({
-                                                x: (Math.random() - 0.5) * 50,
-                                                y: (Math.random() - 0.5) * 50,
-                                                vx: Math.cos(angle) * 30,
-                                                vy: Math.sin(angle) * 30,
+                                                x: (Math.random() - 0.5) * 100,
+                                                y: (Math.random() - 0.5) * 100,
+                                                vx: Math.cos(angle) * 10, // Slower movement, it's about the cut
+                                                vy: Math.sin(angle) * 10,
                                                 life: 10,
                                                 size: 2,
-                                                length: 100,
-                                                width: 4,
+                                                length: 400 + Math.random() * 200,
+                                                width: 4 + Math.random() * 4,
                                                 color: '#ffffff',
+                                                type: 'line',
+                                                rotation: angle
+                                        });
+                                }
+                                // Impact sparks
+                                for (let i = 0; i < 10; i++) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 200, y: (Math.random() - 0.5) * 200,
+                                                vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20,
+                                                life: 20, size: 3, color: '#ff0000'
+                                        });
+                                }
+                        };
+                });
+
+                // DISMANTLE - Rapid intersecting slashes (Flying everywhere)
+                fx.registerEffect('dismantle_slash', function (inst) {
+                        inst.emitter = function () {
+                                for (let k = 0; k < 5; k++) { // More slashes per frame
+                                        const angle = Math.random() * Math.PI * 2;
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 800,
+                                                y: (Math.random() - 0.5) * 800,
+                                                vx: Math.cos(angle) * 60, // Extremely fast
+                                                vy: Math.sin(angle) * 60,
+                                                life: 10,
+                                                size: 1,
+                                                length: 200,
+                                                width: 2,
+                                                color: Math.random() > 0.5 ? '#ff0000' : '#ffffff',
                                                 type: 'line',
                                                 rotation: angle
                                         });
@@ -652,41 +633,17 @@
                         };
                 });
 
-                // DISMANTLE - Rapid intersecting slashes
-                fx.registerEffect('dismantle_slash', function (inst) {
-                        inst.emitter = function () {
-                                for (let k = 0; k < 3; k++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        for (let i = 0; i < 10; i++) {
-                                                inst.spawn({
-                                                        x: (Math.random() - 0.5) * 100,
-                                                        y: (Math.random() - 0.5) * 100,
-                                                        vx: Math.cos(angle) * 40,
-                                                        vy: Math.sin(angle) * 40,
-                                                        life: 8,
-                                                        size: 1,
-                                                        length: 150,
-                                                        width: 2,
-                                                        color: '#ff0000',
-                                                        type: 'line',
-                                                        rotation: angle
-                                                });
-                                        }
-                                }
-                        };
-                });
-
-                // BLOOD MIST
+                // BLOOD MIST - The aftermath
                 fx.registerEffect('blood_mist', function (inst) {
                         inst.emitter = function () {
-                                for (let i = 0; i < 20; i++) {
+                                for (let i = 0; i < 30; i++) {
                                         inst.spawn({
-                                                x: (Math.random() - 0.5) * 800,
-                                                y: (Math.random() - 0.5) * 800,
-                                                vx: (Math.random() - 0.5) * 2,
-                                                vy: (Math.random() - 0.5) * 2,
-                                                life: 60,
-                                                size: 2 + Math.random() * 4,
+                                                x: (Math.random() - 0.5) * 1000,
+                                                y: (Math.random() - 0.5) * 1000,
+                                                vx: (Math.random() - 0.5) * 1,
+                                                vy: (Math.random() - 0.5) * 1,
+                                                life: 100,
+                                                size: 5 + Math.random() * 10,
                                                 color: '#8b0000',
                                                 shrink: true
                                         });
@@ -694,94 +651,266 @@
                         };
                 });
 
-                // DOMAIN EXPANSION RING
+                // DOMAIN EXPANSION - Liquid Darkness
                 fx.registerEffect('domain_expansion_ring', function (inst) {
                         let radius = 0;
                         inst.emitter = function () {
-                                radius += 20;
-                                if (radius > 1000) return;
-                                for (let i = 0; i < 60; i++) {
-                                        const angle = (Math.PI * 2 * i) / 60;
+                                radius += 40; // Faster expansion
+                                if (radius > 1500) return;
+                                for (let i = 0; i < 100; i++) {
+                                        const angle = (Math.PI * 2 * i) / 100;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: Math.cos(angle) * 10,
+                                                vy: Math.sin(angle) * 10,
+                                                life: 40,
+                                                size: 20,
+                                                color: '#500000' // Dark red
+                                        });
+                                }
+                        };
+                });
+
+                fx.registerEffect('ghost_particles', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 20; i++) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 600,
+                                                y: (Math.random() - 0.5) * 600,
+                                                vx: (Math.random() - 0.5) * 0.5,
+                                                vy: -Math.random() * 1.5,
+                                                life: 800, // ✅ capped to 800ms
+                                                size: 3 + Math.random() * 6,
+                                                color: `rgba(255,${Math.floor(Math.random() * 100)},${Math.floor(Math.random() * 100)},0.6)`,
+                                                shrink: true,
+                                        });
+                                }
+                        };
+                });
+
+                // Embers for the dismantle slashes
+                fx.registerEffect('embers', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 15; i++) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 200,
+                                                y: (Math.random() - 0.5) * 200,
+                                                vx: (Math.random() - 0.5) * 10,
+                                                vy: -Math.random() * 5,
+                                                life: 20 + Math.random() * 20,
+                                                size: 2 + Math.random() * 3,
+                                                color: '#ff6600'
+                                        });
+                                }
+                        };
+                });
+
+                // Shockwave effect for ultimate cleave
+                fx.registerEffect('shockwave', function (inst) {
+                        let radius = 0;
+                        inst.emitter = function () {
+                                radius += 30;
+                                if (radius > 500) return;
+                                for (let i = 0; i < 50; i++) {
+                                        const angle = (Math.PI * 2 * i) / 50;
                                         inst.spawn({
                                                 x: Math.cos(angle) * radius,
                                                 y: Math.sin(angle) * radius,
                                                 vx: Math.cos(angle) * 5,
                                                 vy: Math.sin(angle) * 5,
                                                 life: 30,
-                                                size: 10,
-                                                color: '#ff0000'
+                                                size: 15,
+                                                color: '#ffffff',
                                         });
                                 }
                         };
                 });
 
-                function activateMalevolentShrine() {
+                function activateHollowPurple() {
                         btn.classList.add('hidden');
                         shrineBtn.classList.add('hidden');
-
-                        const originalTitle = title.innerText;
-                        title.innerText = "伏 魔 御 廚 子"; // Malevolent Shrine
-                        title.style.color = "#ff0000";
-                        title.style.textShadow = "0 0 20px #8b0000";
                         title.classList.add('visible');
 
-                        const sequence = [
-                                // Phase 1: Domain Expansion
-                                [CMD.IMPACT_FRAME, 0, 'rgba(0, 0, 0, 0.8)', 'none'],
-                                [CMD.VFX, 0, 'domain_expansion_ring', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 500, 'rgba(50, 0, 0, 0.5)', 'rumble'],
-
-                                // Phase 2: Shrine Manifests
-                                [CMD.VFX, 1000, 'shrine_outline', '50%', '60%', {}],
-                                [CMD.VFX, 1000, 'blood_mist', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1000, 'rgba(255, 0, 0, 0.2)', 'shake'],
-
-                                // Phase 3: Dismantle (Rapid Slashes)
-                                [CMD.VFX, 2000, 'dismantle_slash', '50%', '50%', {}],
-                                [CMD.VFX, 2100, 'dismantle_slash', '40%', '40%', {}],
-                                [CMD.VFX, 2200, 'dismantle_slash', '60%', '60%', {}],
-                                [CMD.VFX, 2300, 'dismantle_slash', '30%', '70%', {}],
-                                [CMD.VFX, 2400, 'dismantle_slash', '70%', '30%', {}],
-                                [CMD.IMPACT_FRAME, 2400, 'rgba(255, 0, 0, 0.4)', 'shake'],
-
-                                // Phase 4: Cleave (Heavy Hits)
-                                [CMD.VFX, 2800, 'cleave_slash', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 2800, 'rgba(255, 255, 255, 0.8)', 'shake'],
-                                [CMD.VFX, 3000, 'cleave_slash', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 3000, 'rgba(255, 255, 255, 0.8)', 'shake'],
-
-                                // Phase 5: ONSLAUGHT
-                                [CMD.VFX, 3500, 'dismantle_slash', '50%', '50%', {}],
-                                [CMD.VFX, 3550, 'dismantle_slash', '50%', '50%', {}],
-                                [CMD.VFX, 3600, 'dismantle_slash', '50%', '50%', {}],
-                                [CMD.VFX, 3650, 'cleave_slash', '50%', '50%', {}],
-                                [CMD.VFX, 3700, 'blood_mist', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 3700, 'rgba(139, 0, 0, 0.6)', 'rumble'],
-
-                                // Phase 6: FINAL CUT
-                                [CMD.IMPACT_FRAME, 4500, 'rgba(0, 0, 0, 1)', 'invert'],
-                                [CMD.WAIT, 200],
-                                [CMD.IMPACT_FRAME, 4700, 'rgba(255, 0, 0, 1)', 'shake'],
-                                [CMD.VFX, 4700, 'cleave_slash', '50%', '50%', { size: 5, length: 2000 }], // Massive slash
-                                [CMD.VFX, 4700, 'blood_mist', '50%', '50%', {}],
-
-                                // Phase 7: Aftermath
-                                [CMD.IMPACT_FRAME, 5000, 'rgba(50, 0, 0, 0.8)', 'none'],
-                                [CMD.VFX, 5000, 'shrine_outline', '50%', '60%', {}], // Shrine fades
-                                [CMD.WAIT, 1000],
-                                [CMD.IMPACT_FRAME, 6000, 'transparent', 'none']
+                        // Dynamic Title for the Chant (slower)
+                        const originalTitle = title.innerText;
+                        const chantLines = [
+                                "九綱", // Nine Ropes
+                                "偏光", // Polarized Light
+                                "烏と声明", // Crow and Declaration
+                                "表裏の間", // Between Front and Back
+                                "矛盾の臨界点", // Contradiction Critical Point
+                                "虚式「紫」" // Hollow Purple
                         ];
 
-                        fx.runSequence(sequence).then(function () {
+                        let chantIndex = 0;
+                        const chantInterval = setInterval(() => {
+                                if (chantIndex < chantLines.length - 1) {
+                                        title.innerText = chantLines[chantIndex];
+                                        title.style.opacity = 0.9;
+                                        title.style.transform = `translateX(-50%) scale(${1 + chantIndex * 0.12})`;
+                                        chantIndex++;
+                                } else {
+                                        clearInterval(chantInterval);
+                                        title.innerText = originalTitle;
+                                        title.style.transform = "translateX(-50%) scale(1.6)";
+                                        title.style.color = "#fff";
+                                        title.style.textShadow = "0 0 50px #8b00ff, 0 0 120px #fff";
+                                }
+                        }, 1000); // slower chant
+
+                        // --- ABSOLUTE-TIMED SEQUENCE (stretched & paused for readability) ---
+                        const sequence = [
+                                // PHASE 1: THE RITUAL — slower build
+                                [CMD.IMPACT_FRAME, 0, 'rgba(0, 0, 0, 0.6)', 'none'],
+                                [CMD.VFX, 0, 'energy_tornado', '50%', '50%', { color: '#8b00ff', size: 6 }],
+                                [CMD.VFX, 900, 'distortion_wave', '50%', '50%', { color: '#4b0082' }],
+                                [CMD.IMPACT_FRAME, 900, 'rgba(75, 0, 130, 0.22)', 'rumble'],
+
+                                [CMD.VFX, 1900, 'energy_tornado', '50%', '50%', { color: '#d8b4fe', size: 18 }],
+                                [CMD.VFX, 1900, 'purple_lightning', '50%', '50%', { color: '#fff' }],
+                                [CMD.IMPACT_FRAME, 1900, 'rgba(139, 0, 255, 0.32)', 'rumble'],
+
+                                [CMD.VFX, 2800, 'distortion_wave', '50%', '50%', { color: '#fff' }],
+                                [CMD.VFX, 2800, 'black_hole_core', '50%', '50%', { size: 22 }],
+
+                                // Small dramatic pause before duality appears (actual WAIT pause)
+                                // Note: [CMD.WAIT, <absTime>, <msPause>] — converter -> relative + runner awaits <msPause>
+                                [CMD.WAIT, 3000, 500],
+
+                                // PHASE 2: DUALITY — make orbs last longer and move slower
+                                [CMD.VFX, 3500, 'blue_orb', '30%', '50%', { life: 1400, size: 44 }, 'blue'],
+                                [CMD.VFX, 3500, 'red_orb', '70%', '50%', { life: 1400, size: 44 }, 'red'],
+                                [CMD.VFX, 3500, 'particle_storm', '50%', '50%', {}],
+
+                                [CMD.MOVE_VFX, 3800, 'blue', '42%', '50%', 900],
+                                [CMD.MOVE_VFX, 3800, 'red', '58%', '50%', 900],
+                                [CMD.IMPACT_FRAME, 3800, 'rgba(0, 0, 0, 0.33)', 'rumble'],
+
+                                [CMD.MOVE_VFX, 4300, 'blue', '28%', '50%', 900],
+                                [CMD.MOVE_VFX, 4300, 'red', '72%', '50%', 900],
+                                [CMD.VFX, 4300, 'distortion_wave', '50%', '50%', { color: '#00d4ff' }],
+                                [CMD.VFX, 4300, 'distortion_wave', '50%', '50%', { color: '#ff1744' }],
+
+                                [CMD.MOVE_VFX, 4800, 'blue', '50%', '50%', 900],
+                                [CMD.MOVE_VFX, 4800, 'red', '50%', '50%', 900],
+                                [CMD.IMPACT_FRAME, 4800, 'rgba(106, 13, 173, 0.45)', 'chromatic'],
+                                [CMD.VFX, 4800, 'purple_lightning', '50%', '50%', { color: '#d8b4fe', length: 180 }],
+
+                                // Small pause to let tension breathe before fusion
+                                [CMD.WAIT, 5000, 600],
+
+                                // PHASE 3: FUSION — the snap is bigger and clearer
+                                [CMD.MOVE_VFX, 5600, 'blue', '50%', '50%', 600],
+                                [CMD.MOVE_VFX, 5600, 'red', '50%', '50%', 600],
+                                [CMD.VFX, 5600, 'purple_lightning', '50%', '50%', { length: 400, width: 6 }],
+                                [CMD.IMPACT_FRAME, 5600, 'rgba(255, 255, 255, 1)', 'invert'],
+
+                                [CMD.CLEAR_VFX, 6200, 'blue'],
+                                [CMD.CLEAR_VFX, 6200, 'red'],
+
+                                // purple orb appears big and lingers LONGER so you can see & admire it
+                                [CMD.VFX, 6400, 'purple_orb', '50%', '50%', { size: 140, life: 3500 }, 'purple'],
+                                [CMD.VFX, 6400, 'black_hole_core', '50%', '50%', { size: 80, life: 2500 }],
+                                [CMD.VFX, 6400, 'shockwave_helix', '50%', '50%', { size: 28 }],
+
+                                // Build-up before beam: breathing pause + growing core
+                                [CMD.WAIT, 7000, 800],
+                                [CMD.VFX, 7800, 'energy_tornado', '50%', '50%', { color: '#ffffff', size: 40 }],
+
+                                // PHASE 4: 200% OUTPUT — epic beam (beam life stretched to read)
+                                [CMD.IMPACT_FRAME, 8700, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.VFX, 8800, 'purple_beam', '50%', '50%', { size: 260, life: 1600 }, 'beam'],
+                                [CMD.MOVE_VFX, 8800, 'purple', '220%', '50%', 1100],
+                                [CMD.MOVE_VFX, 8800, 'beam', '220%', '50%', 1100],
+
+                                // environmental rolls
+                                [CMD.VFX, 9000, 'apocalypse', '50%', '50%', { size: 48 }],
+                                [CMD.VFX, 9150, 'apocalypse', '80%', '50%', { size: 60 }],
+                                [CMD.VFX, 9300, 'apocalypse', '20%', '50%', { size: 60 }],
+                                [CMD.VFX, 9000, 'dismantle_slash', '50%', '50%', { color: '#8b00ff', length: 700 }],
+
+                                [CMD.IMPACT_FRAME, 9000, 'rgba(139, 0, 255, 0.62)', 'chromatic'],
+                                [CMD.IMPACT_FRAME, 9500, 'rgba(0, 0, 0, 1)', 'invert'],
+
+                                // PHASE 5: AFTERMATH — longer fade
+                                [CMD.WAIT, 2000, 1200],
+                                [CMD.IMPACT_FRAME, 11000, 'transparent', 'none']
+                        ];
+
+                        // convert & run (raise default life a bit to avoid accidental early expiration)
+                        const converted = convertAbsoluteSequence(sequence, { warn: true, defaultVFXLife: 600 });
+                        fx.runSequence(converted).then(function () {
                                 btn.classList.remove('hidden');
                                 shrineBtn.classList.remove('hidden');
                                 title.classList.remove('visible');
-                                // Reset title style after delay
-                                setTimeout(() => {
-                                        title.innerText = originalTitle;
-                                        title.style.color = "";
-                                        title.style.textShadow = "";
-                                }, 1000);
+                                title.innerText = originalTitle;
+                                title.style.transform = "";
+                                title.style.color = "";
+                                title.style.textShadow = "";
+                                clearInterval(chantInterval);
+                        });
+                }
+
+
+                function activateMalevolentShrine() {
+                        btn.classList.add('hidden');
+                        shrineBtn.classList.add('hidden');
+                        title.classList.add('visible');
+
+                        const originalTitle = title.innerText;
+                        title.innerText = "伏 魔 御 厨 子";
+                        title.style.transform = "translateX(-50%) scale(1.8) rotate(-5deg)";
+                        title.style.color = "#ff0000";
+                        title.style.textShadow = `
+                                        0 0 60px #ff0000,
+                                        0 0 180px #fff,
+                                        0 0 300px #ff5555
+                                    `;
+
+                        const sequence = [
+                                // Phase 1: DOMAIN EXPANSION
+                                [CMD.IMPACT_FRAME, 0, 'rgba(0,0,0,0.8)', 'contrast'],
+                                [CMD.VFX, 0, 'black_hole_core', '50%', '50%', { size: 150, life: 1000 }],
+                                [CMD.VFX, 200, 'domain_expansion_ring', '50%', '50%', { life: 1000 }],
+                                [CMD.IMPACT_FRAME, 300, 'rgba(100,0,0,0.6)', 'rumble'],
+                                [CMD.WAIT, 600, 600],
+
+                                // Phase 2: SHRINE MANIFESTATION
+                                [CMD.VFX, 1200, 'shrine_outline', '50%', '60%', { size: 220, life: 1000 }],
+                                [CMD.VFX, 1300, 'blood_mist', '50%', '50%', { life: 800 }],
+                                [CMD.VFX, 1400, 'skull_aura', '50%', '50%', { life: 800 }],
+                                [CMD.VFX, 1500, 'ghost_particles', '50%', '60%', { life: 800 }],
+                                [CMD.IMPACT_FRAME, 1500, 'rgba(255,0,0,0.4)', 'shake'],
+                                [CMD.WAIT, 1800, 600],
+
+                                // Phase 3: DISMANTLE
+                                [CMD.VFX, 2600, 'dismantle_slash', '40%', '50%', { length: 700, life: 1000 }],
+                                [CMD.VFX, 2800, 'dismantle_slash', '60%', '50%', { length: 800, life: 1000 }],
+                                [CMD.VFX, 3000, 'dismantle_slash', '50%', '40%', { length: 900, life: 1000 }],
+                                [CMD.VFX, 3200, 'dismantle_slash', '50%', '60%', { length: 1000, life: 1000 }],
+                                [CMD.VFX, 3400, 'embers', '50%', '50%', { life: 800 }],
+                                [CMD.IMPACT_FRAME, 3800, 'rgba(150,0,0,0.8)', 'rumble'],
+                                [CMD.WAIT, 4000, 400],
+
+                                // Phase 4: CLEAVE (Ultimate Finish)
+                                [CMD.VFX, 4600, 'cleave_slash', '50%', '50%', { size: 250, life: 1200 }],
+                                [CMD.VFX, 4700, 'shockwave', '50%', '50%', { size: 300, life: 1000 }],
+                                [CMD.IMPACT_FRAME, 4600, 'rgba(255,255,255,1)', 'shake'],
+                                [CMD.VFX, 5000, 'apocalypse', '50%', '50%', { size: 400, life: 1500 }],
+                                [CMD.IMPACT_FRAME, 5300, 'rgba(0,0,0,1)', 'none'],
+                        ];
+
+                        // Restore buttons/title after the longest effect finishes
+                        const converted = convertAbsoluteSequence(sequence, { warn: true, defaultVFXLife: 600 });
+                        fx.runSequence(converted).then(function () {
+                                btn.classList.remove('hidden');
+                                shrineBtn.classList.remove('hidden');
+                                title.classList.remove('visible');
+                                title.innerText = originalTitle;
+                                title.style.transform = "";
+                                title.style.color = "";
+                                title.style.textShadow = "";
                         });
                 }
 

@@ -1,6 +1,6 @@
 /**
- * ArcaneFX.js - Ultimate Anime VFX Library
- * Version: 8.5.1 (Fixed Export Error & VFX Movement)
+ * ArcaneFX.js - Ultimate VFX system
+ * Version: 9.0.0
  */
 
 // ============================================================================
@@ -197,10 +197,23 @@ export class ArcaneFX {
         }
 
         // --- ANIMATION & UTILS ---
-        runSequence(sequence, x, y) {
+        async runSequence(sequence, x, y) {
                 const runner = new SequenceRunner(this, sequence, x, y);
                 this.activeSequences.push(runner);
-                return runner.execute().then(() => this.activeSequences = this.activeSequences.filter(r => r !== runner));
+
+                // execute sequence
+                await runner.execute();
+
+                // After the sequence steps finish, wait for active visual effects to drain so the showcase truly ends
+                const maxWait = 10000; // ms - safety cap
+                const poll = 80; // ms
+                const start = Date.now();
+                while (this.activeGlobalEffects.size > 0 && (Date.now() - start) < maxWait) {
+                        await new Promise(r => setTimeout(r, poll));
+                }
+                // tiny grace period for final fades
+                await new Promise(r => setTimeout(r, 60));
+                this.activeSequences = this.activeSequences.filter(r => r !== runner);
         }
 
         applyHtmlFx(type, duration_ms) {
@@ -270,54 +283,257 @@ export class ArcaneFX {
 // ============================================================================
 // SEQUENCE RUNNER
 // ============================================================================
+
+/**
+ * Smart converter:
+ * - Converts absolute timestamps -> relative delays
+ * - Injects life for long-lived VFX
+ * - If a VFX is stored with a storageKey (e.g. 'purple') we compute its last referenced time
+ *   (MOVE_VFX / CLEAR_VFX / any other ref) and set life = (lastRefTime - createTime) + margin
+ */
+export function convertAbsoluteSequence(sequence, opts = {}) {
+        const { warn = true, defaultVFXLife = 200, marginMs = 100 } = opts;
+        const supportedCommands = new Set(Object.values(SEQUENCE_COMMANDS));
+        const longLivedVFX = new Set([
+                'blue_orb', 'red_orb', 'purple_orb', 'purple_beam', 'black_hole_core'
+        ]);
+
+        // First pass: gather last reference time for each storageKey
+        const lastRef = {}; // storageKey -> lastAbsoluteTime
+        for (const step of sequence) {
+                if (!Array.isArray(step) || step.length < 2) continue;
+                const [cmd, absTime, ...args] = step;
+
+                // Look for MOVE_VFX / CLEAR_VFX that reference storage keys
+                if (cmd === SEQUENCE_COMMANDS.MOVE_VFX || cmd === SEQUENCE_COMMANDS.CLEAR_VFX) {
+                        const key = args[0];
+                        if (typeof key === 'string' && key.length > 0) {
+                                lastRef[key] = Math.max(lastRef[key] || 0, absTime);
+                        }
+                }
+
+                // Also check for any other command that might reference a storage key in arg positions
+                // (extend here if you add commands that reference stored keys)
+        }
+
+        // Second pass: convert absolute -> relative, and set life intelligently
+        let lastTime = 0;
+        const relativeSeq = [];
+
+        for (const step of sequence) {
+                if (!Array.isArray(step) || step.length < 2) {
+                        warn && console.warn(`⚠️ Skipping invalid step:`, step);
+                        continue;
+                }
+
+                let [cmd, absTime, ...args] = step;
+
+                if (!supportedCommands.has(cmd)) {
+                        warn && console.warn(`⚠️ Skipping unsupported command:`, cmd, step);
+                        continue;
+                }
+
+                const relDelay = Math.max(0, absTime - lastTime);
+                lastTime = absTime;
+
+                // VFX sanitization + smart life injection
+                if (cmd === SEQUENCE_COMMANDS.VFX) {
+                        const name = args[0];
+                        // args expected: [name, x, y, opts, storageKey]
+                        let optsArg = args[3];
+                        const storageKey = args[4];
+
+                        if (!optsArg || typeof optsArg !== 'object') {
+                                optsArg = {};
+                                args[3] = optsArg;
+                        }
+
+                        // If the effect is considered long-lived and life not set:
+                        if (longLivedVFX.has(name) && optsArg.life === undefined) {
+                                // If it has a storageKey and we found a future lastRef, compute required life
+                                if (storageKey && lastRef[storageKey]) {
+                                        const required = (lastRef[storageKey] - absTime) + marginMs;
+                                        optsArg.life = Math.max(required, defaultVFXLife);
+                                        warn && console.log(`🔧 Injected computed life for '${name}' (key='${storageKey}'): ${optsArg.life}ms`);
+                                } else {
+                                        // No storage key (or no future references found) — apply default
+                                        optsArg.life = defaultVFXLife;
+                                        warn && console.log(`🔧 Injected default life: ${name} → ${defaultVFXLife}`);
+                                }
+                        }
+                }
+
+                relativeSeq.push([cmd, relDelay, ...args]);
+        }
+
+        if (warn) console.log(`✅ Converted ${sequence.length} → ${relativeSeq.length} steps. Max time: ${lastTime}ms`);
+        return relativeSeq;
+}
+
+
+// --- small helper sleep function used by WAIT and other potential async needs
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 class SequenceRunner {
         constructor(engine, seq, tx, ty) {
-                this.engine = engine; this.sequence = seq;
+                this.engine = engine;
+                this.sequence = seq;
                 this.storedEffectIds = {}; // Store VFX IDs to move/clear them later
-                const parse = (v, max) => (typeof v === 'string' && v.includes('%')) ? (parseFloat(v) / 100) * max : parseFloat(v) || max / 2;
+
+                const parse = (v, max) => (
+                        typeof v === 'string' && v.includes('%')
+                                ? (parseFloat(v) / 100) * max
+                                : (parseFloat(v) || max / 2)
+                );
+
                 this.tx = parse(tx || '50%', engine.viewport.width);
                 this.ty = parse(ty || '50%', engine.viewport.height);
         }
+
         async execute() {
                 for (const step of this.sequence) {
                         const [cmd, delay, ...args] = step;
-                        switch (cmd) {
-                                case SEQUENCE_COMMANDS.VFX:
-                                        // [VFX, delay, name, x, y, opts, STORAGE_KEY]
-                                        const storageKey = args[4]; // The optional STORAGE_KEY is args[4]
-                                        const fxId = this.engine.spawn(args[0], args[1] || this.tx, args[2] || this.ty, args[3]);
-                                        if (storageKey) this.storedEffectIds[storageKey] = fxId;
-                                        break;
-                                case SEQUENCE_COMMANDS.MOVE_VFX:
-                                        // [MOVE_VFX, delay, STORAGE_KEY, tx, ty, duration]
-                                        const instanceId = this.storedEffectIds[args[0]];
-                                        const instance = this.engine.activeGlobalEffects.get(instanceId);
-                                        if (instance) {
-                                                const parse = (v, max) => (typeof v === 'string' && v.includes('%')) ? (parseFloat(v) / 100) * max : parseFloat(v);
-                                                instance.moveTo(parse(args[1], this.engine.viewport.width), parse(args[2], this.engine.viewport.height), args[3]);
-                                        }
-                                        break;
-                                case SEQUENCE_COMMANDS.CLEAR_VFX:
-                                        // [CLEAR_VFX, delay, STORAGE_KEY]
-                                        const killId = this.storedEffectIds[args[0]];
-                                        if (this.engine.activeGlobalEffects.has(killId)) {
-                                                this.engine.activeGlobalEffects.get(killId).life = 0; // Kill next frame
-                                        }
-                                        break;
-                                case SEQUENCE_COMMANDS.IMPACT_FRAME:
-                                        if (args[1] && args[1] !== 'none') this.engine.applyHtmlFx(args[1], delay || 100);
-                                        if (args[0]) this.engine.overlay.style.backgroundColor = args[0];
-                                        if (args[0] === 'contrast') this.engine.overlay.style.mixBlendMode = 'exclusion';
-                                        else this.engine.overlay.style.mixBlendMode = 'normal';
-                                        if (delay > 0 && args[0] && args[0] !== 'transparent' && args[0] !== 'contrast')
-                                                setTimeout(() => { if (this.engine.overlay.style.backgroundColor === args[0]) this.engine.overlay.style.backgroundColor = 'transparent'; }, delay);
-                                        break;
-                                case SEQUENCE_COMMANDS.SHADOW: this.engine.createShadows(args[0], args[1], args[2] || 500); break;
-                                case SEQUENCE_COMMANDS.ANIMATE: document.querySelectorAll(args[0]).forEach(el => this.engine.animateHTML(el, args[1])); break;
-                                case SEQUENCE_COMMANDS.PHYSICS: this.engine.applyPhysics(args[0], args[1]); break;
+                        if (delay > 0) {
+                                await new Promise(r => setTimeout(r, delay));
                         }
-                        if (delay > 0) await new Promise(r => setTimeout(r, delay));
+
+                        // Then execute command
+                        switch (cmd) {
+                                case SEQUENCE_COMMANDS.VFX: {
+                                        // [VFX, delay, name, x, y, opts, STORAGE_KEY]
+                                        const name = args[0];
+                                        const x = args[1] || this.tx;
+                                        const y = args[2] || this.ty;
+                                        const opts = args[3] || {};
+                                        const storageKey = args[4]; // optional
+
+                                        const fxId = this.engine.spawn(name, x, y, opts);
+                                        if (storageKey) {
+                                                this.storedEffectIds[storageKey] = fxId;
+                                                console.log(`✅ VFX '${name}' stored as '${storageKey}' → ID: ${fxId}`);
+                                        }
+                                        break;
+                                }
+
+                                case SEQUENCE_COMMANDS.MOVE_VFX: {
+                                        // [MOVE_VFX, delay, STORAGE_KEY, tx, ty, duration]
+                                        const storageKey = args[0];
+                                        const instanceId = this.storedEffectIds[storageKey];
+
+                                        if (!instanceId) {
+                                                console.warn(
+                                                        `⚠️ MOVE_VFX failed: No ID stored for key '${storageKey}'. Known keys:`,
+                                                        Object.keys(this.storedEffectIds)
+                                                );
+                                                break;
+                                        }
+
+                                        const instance = this.engine.activeGlobalEffects.get(instanceId);
+                                        if (!instance) {
+                                                console.warn(
+                                                        `⚠️ MOVE_VFX failed: Instance not found for key '${storageKey}' (ID: ${instanceId}). Active IDs:`,
+                                                        Array.from(this.engine.activeGlobalEffects.keys())
+                                                );
+                                                break;
+                                        }
+
+                                        const parse = (v, max) => (
+                                                typeof v === 'string' && v.includes('%')
+                                                        ? (parseFloat(v) / 100) * max
+                                                        : parseFloat(v)
+                                        );
+
+                                        const tx = parse(args[1], this.engine.viewport.width);
+                                        const ty = parse(args[2], this.engine.viewport.height);
+                                        const duration = args[3] || 300;
+
+                                        instance.moveTo(tx, ty, duration);
+                                        console.log(`➡️ MOVE_VFX: '${storageKey}' → (${tx.toFixed(0)}, ${ty.toFixed(0)}) in ${duration}ms`);
+                                        break;
+                                }
+
+                                case SEQUENCE_COMMANDS.CLEAR_VFX: {
+                                        // [CLEAR_VFX, delay, STORAGE_KEY]
+                                        const storageKey = args[0];
+                                        const killId = this.storedEffectIds[storageKey];
+
+                                        if (!killId) {
+                                                console.warn(`⚠️ CLEAR_VFX: No ID for key '${storageKey}'`);
+                                                break;
+                                        }
+
+                                        const instance = this.engine.activeGlobalEffects.get(killId);
+                                        if (instance) {
+                                                console.log(`🗑️ CLEAR_VFX: Killing '${storageKey}' (ID: ${killId})`);
+                                                instance.life = 0; // kill in next update
+                                        } else {
+                                                console.warn(`⚠️ CLEAR_VFX: Instance '${storageKey}' (ID: ${killId}) already gone.`);
+                                        }
+                                        break;
+                                }
+
+                                case SEQUENCE_COMMANDS.IMPACT_FRAME: {
+                                        // [IMPACT_FRAME, delay, bgColor, fxType]
+                                        const bgColor = args[0];
+                                        const fxType = args[1];
+
+                                        if (fxType && fxType !== 'none') {
+                                                this.engine.applyHtmlFx(fxType, delay || 100);
+                                        }
+
+                                        if (bgColor) {
+                                                this.engine.overlay.style.backgroundColor = bgColor;
+                                                this.engine.overlay.style.mixBlendMode =
+                                                        bgColor === 'contrast' ? 'exclusion' : 'normal';
+                                        }
+
+                                        if (delay > 0 && bgColor && !['transparent', 'contrast'].includes(bgColor)) {
+                                                setTimeout(() => {
+                                                        if (this.engine.overlay.style.backgroundColor === bgColor) {
+                                                                this.engine.overlay.style.backgroundColor = 'transparent';
+                                                        }
+                                                }, delay);
+                                        }
+                                        break;
+                                }
+
+                                case SEQUENCE_COMMANDS.SHADOW:
+                                        this.engine.createShadows(args[0], args[1], args[2] || 500);
+                                        break;
+
+                                case SEQUENCE_COMMANDS.ANIMATE:
+                                        document.querySelectorAll(args[0]).forEach(el =>
+                                                this.engine.animateHTML(el, args[1])
+                                        );
+                                        break;
+
+                                case SEQUENCE_COMMANDS.PHYSICS:
+                                        this.engine.applyPhysics(args[0], args[1]);
+                                        break;
+
+                                // -----------------------------
+                                // WAIT: pause execution for <ms> milliseconds.
+                                // Usage (absolute sequence): [CMD.WAIT, <absTime>, <ms>]
+                                // convertAbsoluteSequence -> [CMD.WAIT, <relDelay>, <ms>]
+                                // -----------------------------
+                                case SEQUENCE_COMMANDS.WAIT: {
+                                        const ms = args[0] || 0;
+                                        if (typeof ms !== 'number') {
+                                                console.warn(`⚠️ WAIT expects a numeric ms, got:`, ms);
+                                                break;
+                                        }
+                                        // pause the sequence for ms
+                                        await sleep(ms);
+                                        break;
+                                }
+
+                                default:
+                                        console.warn(`⚠️ Unknown command:`, cmd);
+                                        break;
+                        }
                 }
+
+                // Cleanup
                 this.engine.overlay.style.backgroundColor = 'transparent';
                 this.engine.overlay.style.mixBlendMode = 'normal';
         }
@@ -326,14 +542,21 @@ class SequenceRunner {
 // ============================================================================
 // EFFECT INSTANCE (VFX Lifecycle)
 // ============================================================================
+
 class EffectInstance {
         constructor(ctx, w, h, container, x, y, opts) {
-                this.ctx = ctx; this.w = w; this.h = h; this.container = container;
-                this.x = x; this.y = y; this.options = opts || {};
-                this.particles = []; this.life = 100; this.id = Math.random().toString(36).substr(2);
+                this.ctx = ctx;
+                this.w = w;
+                this.h = h;
+                this.container = container;
+                this.x = x;
+                this.y = y;
+                this.options = opts || {};
+                this.particles = [];
+                // ✅ Respect opts.life — critical for long-lived orbs!
+                this.life = opts?.life ?? 100;
+                this.id = Math.random().toString(36).substring(2, 10); // shorter, safer ID
                 this.emitter = null;
-
-                // Movement Interpolation
                 this.moveTarget = null;
         }
         spawn(p) {
@@ -361,7 +584,10 @@ class EffectInstance {
                         const ease = t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
                         this.x = this.moveTarget.sx + (this.moveTarget.tx - this.moveTarget.sx) * ease;
                         this.y = this.moveTarget.sy + (this.moveTarget.ty - this.moveTarget.sy) * ease;
-                        if (t >= 1) this.moveTarget = null;
+                        if (t >= 1) {
+                                this.moveTarget = null;
+                                this._justMoved = 10;
+                        }
                 }
 
                 this.life--; if (this.container) this.ctx.clearRect(0, 0, this.w, this.h);
@@ -372,7 +598,8 @@ class EffectInstance {
                         p.life--; if (p.shrink) p.size *= 0.9;
                 });
                 if (this.container && this.life <= -100 && this.particles.length === 0) return false;
-                return this.particles.length > 0 || this.life > 0;
+                const stillMoving = this.moveTarget !== null || (this._justMoved && (this._justMoved-- > 0));
+                return this.particles.length > 0 || this.life > 0 || stillMoving;
         }
         render(ctx) {
                 this.particles.forEach(p => {
