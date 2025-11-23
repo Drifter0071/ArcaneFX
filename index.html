@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hollow Purple - Ultimate Technique</title>
+        <style>
+                * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                }
+
+                body {
+                        background: #000000;
+                        font-family: 'Arial Black', sans-serif;
+                        overflow: hidden;
+                        height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                }
+
+                #container {
+                        position: relative;
+                        width: 100vw;
+                        height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                }
+
+                #activate-btn {
+                        padding: 30px 60px;
+                        font-size: 32px;
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        text-transform: uppercase;
+                        letter-spacing: 3px;
+                        background: linear-gradient(135deg, #6a0dad, #4b0082, #8b00ff);
+                        color: white;
+                        box-shadow:
+                                0 0 30px rgba(138, 43, 226, 0.8),
+                                0 0 60px rgba(138, 43, 226, 0.4),
+                                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                        transition: all 0.3s;
+                        animation: pulse 2s ease-in-out infinite;
+                        z-index: 10000;
+                }
+
+                #activate-btn:hover {
+                        transform: scale(1.1);
+                        box-shadow:
+                                0 0 50px rgba(138, 43, 226, 1),
+                                0 0 100px rgba(138, 43, 226, 0.6),
+                                inset 0 0 30px rgba(255, 255, 255, 0.3);
+                }
+
+                #activate-btn:active {
+                        transform: scale(0.95);
+                }
+
+                #activate-btn.hidden {
+                        opacity: 0;
+                        pointer-events: none;
+                        transform: scale(0);
+                }
+
+                @keyframes pulse {
+
+                        0%,
+                        100% {
+                                box-shadow:
+                                        0 0 30px rgba(138, 43, 226, 0.8),
+                                        0 0 60px rgba(138, 43, 226, 0.4),
+                                        inset 0 0 20px rgba(255, 255, 255, 0.2);
+                        }
+
+                        50% {
+                                box-shadow:
+                                        0 0 50px rgba(138, 43, 226, 1),
+                                        0 0 100px rgba(138, 43, 226, 0.6),
+                                        inset 0 0 30px rgba(255, 255, 255, 0.3);
+                        }
+                }
+
+                #title {
+                        position: fixed;
+                        top: 50px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 64px;
+                        color: #8b00ff;
+                        text-shadow:
+                                0 0 20px rgba(138, 43, 226, 1),
+                                0 0 40px rgba(138, 43, 226, 0.8),
+                                0 0 60px rgba(138, 43, 226, 0.6);
+                        z-index: 10000;
+                        letter-spacing: 8px;
+                        opacity: 0;
+                        transition: opacity 1s;
+                }
+
+                #title.visible {
+                        opacity: 1;
+                        animation: titlePulse 0.5s ease-in-out infinite;
+                }
+
+                @keyframes titlePulse {
+
+                        0%,
+                        100% {
+                                text-shadow:
+                                        0 0 20px rgba(138, 43, 226, 1),
+                                        0 0 40px rgba(138, 43, 226, 0.8);
+                        }
+
+                        50% {
+                                text-shadow:
+                                        0 0 40px rgba(138, 43, 226, 1),
+                                        0 0 80px rgba(138, 43, 226, 1),
+                                        0 0 120px rgba(138, 43, 226, 0.8);
+                        }
+                }
+        </style>
+</head>
+
+<body>
+        <div id="title">虚 式 「 紫 」</div>
+
+        <div id="container">
+                <button id="activate-btn">Hollow Purple</button>
+        </div>
+
+        <script type="module">
+                import { ArcaneFX, SEQUENCE_COMMANDS as CMD } from './ArcaneFX.js';
+
+                const fx = new ArcaneFX();
+                const btn = document.getElementById('activate-btn');
+                const title = document.getElementById('title');
+
+                // BLUE ORB - Glowing sphere with intense particles
+                fx.registerEffect('blue_orb', function (inst) {
+                        inst.emitter = function () {
+                                // Core orb glow
+                                for (let i = 0; i < 30; i++) {
+                                        const angle = (Math.PI * 2 * i) / 30;
+                                        const radius = 40 + Math.sin(inst.life * 0.2) * 10;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: 0,
+                                                vy: 0,
+                                                life: 20,
+                                                size: 25,
+                                                color: '#00d4ff'
+                                        });
+                                }
+                                // Intense particle attraction
+                                for (let i = 0; i < 20; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const distance = 200 + Math.random() * 300;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * distance,
+                                                y: Math.sin(angle) * distance,
+                                                vx: -Math.cos(angle) * 10,
+                                                vy: -Math.sin(angle) * 10,
+                                                life: 50,
+                                                size: 8 + Math.random() * 12,
+                                                color: Math.random() > 0.3 ? '#00d4ff' : '#ffffff',
+                                                shrink: true
+                                        });
+                                }
+                        };
+                });
+
+                // RED ORB - Glowing sphere with intense particles
+                fx.registerEffect('red_orb', function (inst) {
+                        inst.emitter = function () {
+                                // Core orb glow
+                                for (let i = 0; i < 30; i++) {
+                                        const angle = (Math.PI * 2 * i) / 30;
+                                        const radius = 40 + Math.sin(inst.life * 0.2) * 10;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: 0,
+                                                vy: 0,
+                                                life: 20,
+                                                size: 25,
+                                                color: '#ff1744'
+                                        });
+                                }
+                                // Intense particle repulsion
+                                for (let i = 0; i < 20; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const distance = 200 + Math.random() * 300;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * distance,
+                                                y: Math.sin(angle) * distance,
+                                                vx: -Math.cos(angle) * 10,
+                                                vy: -Math.sin(angle) * 10,
+                                                life: 50,
+                                                size: 8 + Math.random() * 12,
+                                                color: Math.random() > 0.3 ? '#ff1744' : '#ffffff',
+                                                shrink: true
+                                        });
+                                }
+                        };
+                });
+
+                // PURPLE ORB - INFINITE POWER
+                fx.registerEffect('purple_orb', function (inst) {
+                        inst.emitter = function () {
+                                // Massive glowing core
+                                for (let i = 0; i < 50; i++) {
+                                        const angle = (Math.PI * 2 * i) / 50;
+                                        const radius = 60 + Math.sin(inst.life * 0.15) * 20;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: 0,
+                                                vy: 0,
+                                                life: 15,
+                                                size: 35,
+                                                color: '#8b00ff'
+                                        });
+                                }
+                                // Inner white core
+                                for (let i = 0; i < 20; i++) {
+                                        const angle = (Math.PI * 2 * i) / 20;
+                                        const radius = 20;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: 0,
+                                                vy: 0,
+                                                life: 15,
+                                                size: 25,
+                                                color: '#ffffff'
+                                        });
+                                }
+                                // Energy crackling
+                                for (let i = 0; i < 30; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const distance = Math.random() * 150;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * distance,
+                                                y: Math.sin(angle) * distance,
+                                                vx: (Math.random() - 0.5) * 8,
+                                                vy: (Math.random() - 0.5) * 8,
+                                                life: 30,
+                                                size: 10 + Math.random() * 15,
+                                                color: Math.random() > 0.5 ? '#8b00ff' : '#ffffff'
+                                        });
+                                }
+                        };
+                });
+
+                // PARTICLE STORM
+                fx.registerEffect('particle_storm', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 50; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const distance = Math.random() * 500;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * distance,
+                                                y: Math.sin(angle) * distance,
+                                                vx: -Math.cos(angle) * 15,
+                                                vy: -Math.sin(angle) * 15,
+                                                life: 40,
+                                                size: 5 + Math.random() * 10,
+                                                color: ['#8b00ff', '#ff1744', '#00d4ff', '#ffffff'][Math.floor(Math.random() * 4)],
+                                                shrink: true
+                                        });
+                                }
+                        };
+                });
+
+                // PURPLE BEAM - Devastating column
+                fx.registerEffect('purple_beam', function (inst) {
+                        inst.emitter = function () {
+                                // Main beam core
+                                for (let i = 0; i < 40; i++) {
+                                        inst.spawn({
+                                                x: i * 25,
+                                                y: (Math.random() - 0.5) * 150,
+                                                vx: 35,
+                                                vy: (Math.random() - 0.5) * 5,
+                                                life: 50,
+                                                size: 30 + Math.random() * 30,
+                                                color: '#8b00ff'
+                                        });
+                                }
+                                // White inner beam
+                                for (let i = 0; i < 30; i++) {
+                                        inst.spawn({
+                                                x: i * 25,
+                                                y: (Math.random() - 0.5) * 80,
+                                                vx: 35,
+                                                vy: (Math.random() - 0.5) * 3,
+                                                life: 50,
+                                                size: 20 + Math.random() * 20,
+                                                color: '#ffffff'
+                                        });
+                                }
+                        };
+                });
+
+                // APOCALYPSE - Maximum destruction
+                fx.registerEffect('apocalypse', function (inst) {
+                        // Multiple explosive rings
+                        for (let ring = 0; ring < 10; ring++) {
+                                const particlesPerRing = 100;
+                                for (let i = 0; i < particlesPerRing; i++) {
+                                        const angle = (Math.PI * 2 * i) / particlesPerRing;
+                                        const speed = 20 + ring * 8 + Math.random() * 15;
+                                        inst.spawn({
+                                                x: 0,
+                                                y: 0,
+                                                vx: Math.cos(angle) * speed,
+                                                vy: Math.sin(angle) * speed,
+                                                life: 80 - ring * 5,
+                                                size: 20 - ring * 1.5,
+                                                color: ring % 3 === 0 ? '#ffffff' : ring % 3 === 1 ? '#8b00ff' : '#6a0dad',
+                                                shrink: true
+                                        });
+                                }
+                        }
+                });
+
+                // DISTORTION WAVE
+                fx.registerEffect('distortion_wave', function (inst) {
+                        let radius = 0;
+                        inst.emitter = function () {
+                                radius += 30;
+                                if (radius > 600) return;
+                                for (let i = 0; i < 80; i++) {
+                                        const angle = (Math.PI * 2 * i) / 80;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: Math.cos(angle) * 5,
+                                                vy: Math.sin(angle) * 5,
+                                                life: 25,
+                                                size: 8,
+                                                color: i % 2 === 0 ? '#8b00ff' : '#ffffff'
+                                        });
+                                }
+                        };
+                });
+
+                // ENERGY TORNADO
+                fx.registerEffect('energy_tornado', function (inst) {
+                        let angle = 0;
+                        inst.emitter = function () {
+                                angle += 0.5;
+                                for (let i = 0; i < 8; i++) {
+                                        const spiral = angle + (i * Math.PI / 4);
+                                        const radius = 100 + Math.sin(angle * 0.5) * 50;
+                                        inst.spawn({
+                                                x: Math.cos(spiral) * radius,
+                                                y: Math.sin(spiral) * radius,
+                                                vx: -Math.cos(spiral) * 8,
+                                                vy: -Math.sin(spiral) * 8,
+                                                life: 40,
+                                                size: 12,
+                                                color: i % 2 === 0 ? '#8b00ff' : '#ffffff',
+                                                shrink: true
+                                        });
+                                }
+                        };
+                });
+
+                // INSANE Hollow Purple Sequence
+                function activateHollowPurple() {
+                        btn.classList.add('hidden');
+                        title.classList.add('visible');
+
+                        const sequence = [
+                                // Phase 1: Blue Orb Manifests
+                                [CMD.VFX, 0, 'blue_orb', '25%', '50%', {}, 'blue'],
+                                [CMD.VFX, 0, 'particle_storm', '25%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 100, 'rgba(0, 212, 255, 0.3)', 'none'],
+
+                                // Phase 2: Red Orb Manifests
+                                [CMD.VFX, 200, 'red_orb', '75%', '50%', {}, 'red'],
+                                [CMD.VFX, 200, 'particle_storm', '75%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 300, 'rgba(255, 23, 68, 0.3)', 'none'],
+
+                                // Phase 3: Orbs Rush to Center
+                                [CMD.MOVE_VFX, 400, 'blue', '50%', '50%', 400],
+                                [CMD.MOVE_VFX, 400, 'red', '50%', '50%', 400],
+                                [CMD.VFX, 400, 'energy_tornado', '50%', '50%', {}],
+                                [CMD.VFX, 500, 'particle_storm', '50%', '50%', {}],
+
+                                // Phase 4: COLLISION - SOLID WHITE FLASH
+                                [CMD.IMPACT_FRAME, 800, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.CLEAR_VFX, 800, 'blue'],
+                                [CMD.CLEAR_VFX, 800, 'red'],
+                                [CMD.VFX, 800, 'apocalypse', '50%', '50%', {}],
+
+                                // Phase 5: BLACK SCREEN
+                                [CMD.IMPACT_FRAME, 833, 'rgba(0, 0, 0, 1)', 'invert'],
+
+                                // Phase 6: WHITE FLASH
+                                [CMD.IMPACT_FRAME, 866, 'rgba(255, 255, 255, 1)', 'shake'],
+
+                                // Phase 7: PURPLE ORB FORMS - MAIN FOCUS
+                                [CMD.VFX, 900, 'purple_orb', '50%', '50%', {}, 'purple'],
+                                [CMD.VFX, 900, 'particle_storm', '50%', '50%', {}],
+                                [CMD.VFX, 900, 'distortion_wave', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 950, 'rgba(139, 0, 255, 0.8)', 'chromatic'],
+
+                                // Phase 8: PURPLE ORB INTENSIFIES
+                                [CMD.VFX, 1100, 'particle_storm', '50%', '50%', {}],
+                                [CMD.VFX, 1100, 'energy_tornado', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1150, 'rgba(139, 0, 255, 0.9)', 'shake'],
+
+                                // Phase 9: PURPLE EXPLOSION 1
+                                [CMD.VFX, 1300, 'apocalypse', '50%', '50%', {}],
+                                [CMD.VFX, 1300, 'distortion_wave', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1300, 'rgba(139, 0, 255, 1)', 'shake'],
+
+                                // Phase 10: PURPLE FLASH
+                                [CMD.IMPACT_FRAME, 1350, 'rgba(106, 13, 173, 1)', 'chromatic'],
+
+                                // Phase 11: PURPLE ORB GROWS
+                                [CMD.VFX, 1400, 'particle_storm', '50%', '50%', {}],
+                                [CMD.VFX, 1400, 'distortion_wave', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1450, 'rgba(139, 0, 255, 0.9)', 'rumble'],
+
+                                // Phase 12: PURPLE EXPLOSION 2
+                                [CMD.VFX, 1600, 'apocalypse', '50%', '50%', {}],
+                                [CMD.VFX, 1600, 'void_particles', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1600, 'rgba(139, 0, 255, 1)', 'shake'],
+
+                                // Phase 13: MAXIMUM CHARGE - WHITE FLASH
+                                [CMD.VFX, 1750, 'particle_storm', '50%', '50%', {}],
+                                [CMD.VFX, 1750, 'energy_tornado', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1800, 'rgba(255, 255, 255, 1)', 'shake'],
+
+                                // Phase 14: BEAM RELEASE
+                                [CMD.VFX, 1850, 'purple_beam', '50%', '50%', {}, 'beam'],
+                                [CMD.VFX, 1850, 'particle_storm', '50%', '50%', {}],
+                                [CMD.MOVE_VFX, 1880, 'beam', '95%', '50%', 700],
+                                [CMD.IMPACT_FRAME, 1880, 'rgba(139, 0, 255, 1)', 'blur'],
+
+                                // Phase 15: PURPLE FLASH DURING TRAVEL
+                                [CMD.IMPACT_FRAME, 2000, 'rgba(106, 13, 173, 0.8)', 'chromatic'],
+
+                                // Phase 16: BEAM TRAVEL
+                                [CMD.VFX, 2100, 'distortion_wave', '65%', '50%', {}],
+                                [CMD.VFX, 2250, 'distortion_wave', '80%', '50%', {}],
+                                [CMD.VFX, 2400, 'particle_storm', '85%', '50%', {}],
+
+                                // Phase 17: PURPLE FLASH
+                                [CMD.IMPACT_FRAME, 2500, 'rgba(139, 0, 255, 1)', 'shake'],
+
+                                // Phase 18: IMPACT - SOLID WHITE
+                                [CMD.IMPACT_FRAME, 2580, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.VFX, 2580, 'apocalypse', '95%', '50%', {}],
+                                [CMD.VFX, 2580, 'apocalypse', '95%', '50%', {}],
+
+                                // Phase 19: BLACK FLASH
+                                [CMD.IMPACT_FRAME, 2613, 'rgba(0, 0, 0, 1)', 'invert'],
+
+                                // Phase 20: PURPLE FLASH
+                                [CMD.IMPACT_FRAME, 2646, 'rgba(139, 0, 255, 1)', 'shake'],
+
+                                // Phase 21: WHITE FLASH
+                                [CMD.IMPACT_FRAME, 2680, 'rgba(255, 255, 255, 1)', 'shake'],
+
+                                // Phase 22: PURPLE EXPLOSION WAVES
+                                [CMD.VFX, 2720, 'apocalypse', '95%', '50%', {}],
+                                [CMD.VFX, 2720, 'distortion_wave', '95%', '50%', {}],
+                                [CMD.VFX, 2720, 'particle_storm', '95%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 2750, 'rgba(139, 0, 255, 1)', 'chromatic'],
+
+                                // Phase 23: BLACK FLASH
+                                [CMD.IMPACT_FRAME, 2850, 'rgba(0, 0, 0, 1)', 'invert'],
+
+                                // Phase 24: PURPLE FLASH
+                                [CMD.IMPACT_FRAME, 2883, 'rgba(106, 13, 173, 1)', 'shake'],
+
+                                // Phase 25: FINAL WHITE FLASH
+                                [CMD.IMPACT_FRAME, 2916, 'rgba(255, 255, 255, 1)', 'shake'],
+
+                                // Phase 26: PURPLE SHOCKWAVES
+                                [CMD.VFX, 2950, 'distortion_wave', '95%', '50%', {}],
+                                [CMD.VFX, 3050, 'distortion_wave', '75%', '50%', {}],
+                                [CMD.VFX, 3150, 'distortion_wave', '55%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 3200, 'rgba(139, 0, 255, 0.7)', 'chromatic'],
+
+                                // Phase 27: FADE OUT
+                                [CMD.VFX, 3400, 'particle_storm', '95%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 3600, 'rgba(139, 0, 255, 0.3)', 'none'],
+                                [CMD.IMPACT_FRAME, 3800, 'transparent', 'none'],
+                                [CMD.WAIT, 500]
+                        ];
+
+                        fx.runSequence(sequence).then(function () {
+                                btn.classList.remove('hidden');
+                                title.classList.remove('visible');
+                        });
+                }
+
+                btn.addEventListener('click', activateHollowPurple);
+
+                console.log('💜 HOLLOW PURPLE READY - INFINITE POWER');
+        </script>
+</body>
+
+</html>
