@@ -125,6 +125,63 @@
                                         0 0 120px rgba(138, 43, 226, 0.8);
                         }
                 }
+
+                #activate-shrine-btn {
+                        padding: 30px 60px;
+                        font-size: 32px;
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        text-transform: uppercase;
+                        letter-spacing: 3px;
+                        background: linear-gradient(135deg, #8b0000, #300000, #ff0000);
+                        color: white;
+                        box-shadow:
+                                0 0 30px rgba(139, 0, 0, 0.8),
+                                0 0 60px rgba(139, 0, 0, 0.4),
+                                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                        transition: all 0.3s;
+                        animation: pulse-red 2s ease-in-out infinite;
+                        margin-left: 20px;
+                        z-index: 10000;
+                }
+
+                #activate-shrine-btn:hover {
+                        transform: scale(1.1);
+                        box-shadow:
+                                0 0 50px rgba(255, 0, 0, 1),
+                                0 0 100px rgba(139, 0, 0, 0.6),
+                                inset 0 0 30px rgba(255, 255, 255, 0.3);
+                }
+
+                #activate-shrine-btn:active {
+                        transform: scale(0.95);
+                }
+
+                #activate-shrine-btn.hidden {
+                        opacity: 0;
+                        pointer-events: none;
+                        transform: scale(0);
+                }
+
+                @keyframes pulse-red {
+
+                        0%,
+                        100% {
+                                box-shadow:
+                                        0 0 30px rgba(139, 0, 0, 0.8),
+                                        0 0 60px rgba(139, 0, 0, 0.4),
+                                        inset 0 0 20px rgba(255, 255, 255, 0.2);
+                        }
+
+                        50% {
+                                box-shadow:
+                                        0 0 50px rgba(255, 0, 0, 1),
+                                        0 0 100px rgba(139, 0, 0, 0.6),
+                                        inset 0 0 30px rgba(255, 255, 255, 0.3);
+                        }
+                }
         </style>
 </head>
 
@@ -133,6 +190,7 @@
 
         <div id="container">
                 <button id="activate-btn">Hollow Purple</button>
+                <button id="activate-shrine-btn">Malevolent Shrine</button>
         </div>
 
         <script type="module">
@@ -140,6 +198,7 @@
 
                 const fx = new ArcaneFX();
                 const btn = document.getElementById('activate-btn');
+                const shrineBtn = document.getElementById('activate-shrine-btn');
                 const title = document.getElementById('title');
 
                 // BLUE ORB - Glowing sphere with intense particles
@@ -375,140 +434,359 @@
                         };
                 });
 
+                // --- NEW ENHANCED EFFECTS ---
+
+                // PURPLE LIGHTNING - Jagged high-energy arcs
+                fx.registerEffect('purple_lightning', function (inst) {
+                        inst.emitter = function () {
+                                if (Math.random() > 0.3) return; // Intermittent
+                                const segments = 10;
+                                let startX = (Math.random() - 0.5) * 400;
+                                let startY = (Math.random() - 0.5) * 400;
+                                for (let i = 0; i < segments; i++) {
+                                        const endX = startX + (Math.random() - 0.5) * 100;
+                                        const endY = startY + (Math.random() - 0.5) * 100;
+                                        inst.spawn({
+                                                x: startX,
+                                                y: startY,
+                                                vx: 0, vy: 0,
+                                                life: 5,
+                                                size: 3,
+                                                length: Math.hypot(endX - startX, endY - startY),
+                                                width: 3,
+                                                color: '#d8b4fe', // Light purple
+                                                type: 'line',
+                                                rotation: Math.atan2(endY - startY, endX - startX)
+                                        });
+                                        startX = endX;
+                                        startY = endY;
+                                }
+                        };
+                });
+
+                // BLACK HOLE CORE - Imploding density
+                fx.registerEffect('black_hole_core', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 20; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const dist = 300 + Math.random() * 200;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * dist,
+                                                y: Math.sin(angle) * dist,
+                                                vx: -Math.cos(angle) * 15, // Suck in fast
+                                                vy: -Math.sin(angle) * 15,
+                                                life: 30,
+                                                size: 5 + Math.random() * 10,
+                                                color: Math.random() > 0.5 ? '#000000' : '#4b0082', // Black and indigo
+                                                shrink: false
+                                        });
+                                }
+                                // Event Horizon
+                                for (let i = 0; i < 10; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const radius = 50;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: 0, vy: 0,
+                                                life: 10,
+                                                size: 40,
+                                                color: '#000000'
+                                        });
+                                }
+                        };
+                });
+
+                // SHOCKWAVE HELIX - Spiraling expansion
+                fx.registerEffect('shockwave_helix', function (inst) {
+                        let angle = 0;
+                        inst.emitter = function () {
+                                angle += 0.4;
+                                // Double helix
+                                for (let k = 0; k < 2; k++) {
+                                        const a = angle + k * Math.PI;
+                                        for (let i = 0; i < 5; i++) {
+                                                const r = 50 + i * 20;
+                                                inst.spawn({
+                                                        x: Math.cos(a) * r,
+                                                        y: Math.sin(a) * r,
+                                                        vx: Math.cos(a) * 10,
+                                                        vy: Math.sin(a) * 10,
+                                                        life: 40,
+                                                        size: 10,
+                                                        color: k === 0 ? '#8b00ff' : '#ffffff',
+                                                        shrink: true
+                                                });
+                                        }
+                                }
+                        };
+                });
+
                 // INSANE Hollow Purple Sequence
                 function activateHollowPurple() {
                         btn.classList.add('hidden');
+                        shrineBtn.classList.add('hidden');
                         title.classList.add('visible');
 
                         const sequence = [
-                                // Phase 1: Blue Orb Manifests
-                                [CMD.VFX, 0, 'blue_orb', '25%', '50%', {}, 'blue'],
-                                [CMD.VFX, 0, 'particle_storm', '25%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 100, 'rgba(0, 212, 255, 0.3)', 'none'],
+                                // Phase 1: Blue Orb Manifests (Amplification)
+                                [CMD.VFX, 0, 'blue_orb', '30%', '50%', {}, 'blue'],
+                                [CMD.VFX, 0, 'particle_storm', '30%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 100, 'rgba(0, 212, 255, 0.4)', 'none'],
 
-                                // Phase 2: Red Orb Manifests
-                                [CMD.VFX, 200, 'red_orb', '75%', '50%', {}, 'red'],
-                                [CMD.VFX, 200, 'particle_storm', '75%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 300, 'rgba(255, 23, 68, 0.3)', 'none'],
+                                // Phase 2: Red Orb Manifests (Reversal)
+                                [CMD.VFX, 400, 'red_orb', '70%', '50%', {}, 'red'],
+                                [CMD.VFX, 400, 'particle_storm', '70%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 500, 'rgba(255, 23, 68, 0.4)', 'none'],
 
-                                // Phase 3: Orbs Rush to Center
-                                [CMD.MOVE_VFX, 400, 'blue', '50%', '50%', 400],
-                                [CMD.MOVE_VFX, 400, 'red', '50%', '50%', 400],
-                                [CMD.VFX, 400, 'energy_tornado', '50%', '50%', {}],
-                                [CMD.VFX, 500, 'particle_storm', '50%', '50%', {}],
+                                // Phase 3: Convergence
+                                [CMD.MOVE_VFX, 800, 'blue', '50%', '50%', 600],
+                                [CMD.MOVE_VFX, 800, 'red', '50%', '50%', 600],
+                                [CMD.VFX, 800, 'energy_tornado', '50%', '50%', {}],
+                                [CMD.VFX, 1000, 'purple_lightning', '50%', '50%', {}], // New lightning
 
-                                // Phase 4: COLLISION - SOLID WHITE FLASH
-                                [CMD.IMPACT_FRAME, 800, 'rgba(255, 255, 255, 1)', 'shake'],
-                                [CMD.CLEAR_VFX, 800, 'blue'],
-                                [CMD.CLEAR_VFX, 800, 'red'],
-                                [CMD.VFX, 800, 'apocalypse', '50%', '50%', {}],
+                                // Phase 4: SINGULARITY FORMING
+                                [CMD.CLEAR_VFX, 1400, 'blue'],
+                                [CMD.CLEAR_VFX, 1400, 'red'],
+                                [CMD.IMPACT_FRAME, 1400, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.VFX, 1400, 'black_hole_core', '50%', '50%', {}], // New black hole
+                                [CMD.VFX, 1400, 'apocalypse', '50%', '50%', {}],
 
-                                // Phase 5: BLACK SCREEN
-                                [CMD.IMPACT_FRAME, 833, 'rgba(0, 0, 0, 1)', 'invert'],
+                                // Phase 5: SILENCE BEFORE DESTRUCTION
+                                [CMD.IMPACT_FRAME, 1450, 'rgba(0, 0, 0, 1)', 'invert'],
+                                [CMD.WAIT, 200],
 
-                                // Phase 6: WHITE FLASH
-                                [CMD.IMPACT_FRAME, 866, 'rgba(255, 255, 255, 1)', 'shake'],
+                                // Phase 6: HOLLOW PURPLE ACTIVATION
+                                [CMD.IMPACT_FRAME, 1650, 'rgba(139, 0, 255, 1)', 'chromatic'],
+                                [CMD.VFX, 1650, 'purple_orb', '50%', '50%', {}, 'purple'],
+                                [CMD.VFX, 1650, 'shockwave_helix', '50%', '50%', {}], // New helix
+                                [CMD.VFX, 1650, 'purple_lightning', '50%', '50%', {}],
 
-                                // Phase 7: PURPLE ORB FORMS - MAIN FOCUS
-                                [CMD.VFX, 900, 'purple_orb', '50%', '50%', {}, 'purple'],
-                                [CMD.VFX, 900, 'particle_storm', '50%', '50%', {}],
-                                [CMD.VFX, 900, 'distortion_wave', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 950, 'rgba(139, 0, 255, 0.8)', 'chromatic'],
+                                // Phase 7: CHARGE UP
+                                [CMD.VFX, 2000, 'distortion_wave', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 2000, 'rgba(139, 0, 255, 0.5)', 'rumble'],
+                                [CMD.VFX, 2200, 'black_hole_core', '50%', '50%', {}], // More density
 
-                                // Phase 8: PURPLE ORB INTENSIFIES
-                                [CMD.VFX, 1100, 'particle_storm', '50%', '50%', {}],
-                                [CMD.VFX, 1100, 'energy_tornado', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1150, 'rgba(139, 0, 255, 0.9)', 'shake'],
+                                // Phase 8: RELEASE THE BEAM
+                                [CMD.IMPACT_FRAME, 2500, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.VFX, 2500, 'purple_beam', '50%', '50%', {}, 'beam'],
+                                [CMD.MOVE_VFX, 2550, 'beam', '120%', '50%', 1000], // Shoot off screen
+                                [CMD.MOVE_VFX, 2550, 'purple', '120%', '50%', 1000], // Orb follows
 
-                                // Phase 9: PURPLE EXPLOSION 1
-                                [CMD.VFX, 1300, 'apocalypse', '50%', '50%', {}],
-                                [CMD.VFX, 1300, 'distortion_wave', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1300, 'rgba(139, 0, 255, 1)', 'shake'],
+                                // Phase 9: DESTRUCTION TRAIL
+                                [CMD.VFX, 2600, 'shockwave_helix', '60%', '50%', {}],
+                                [CMD.VFX, 2700, 'shockwave_helix', '80%', '50%', {}],
+                                [CMD.VFX, 2600, 'purple_lightning', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 2600, 'rgba(139, 0, 255, 0.8)', 'chromatic'],
 
-                                // Phase 10: PURPLE FLASH
-                                [CMD.IMPACT_FRAME, 1350, 'rgba(106, 13, 173, 1)', 'chromatic'],
+                                // Phase 10: SCREEN NUKE
+                                [CMD.IMPACT_FRAME, 3000, 'rgba(255, 255, 255, 1)', 'shake'],
+                                [CMD.VFX, 3000, 'apocalypse', '50%', '50%', {}],
+                                [CMD.VFX, 3000, 'apocalypse', '80%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 3100, 'rgba(0, 0, 0, 1)', 'invert'],
 
-                                // Phase 11: PURPLE ORB GROWS
-                                [CMD.VFX, 1400, 'particle_storm', '50%', '50%', {}],
-                                [CMD.VFX, 1400, 'distortion_wave', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1450, 'rgba(139, 0, 255, 0.9)', 'rumble'],
-
-                                // Phase 12: PURPLE EXPLOSION 2
-                                [CMD.VFX, 1600, 'apocalypse', '50%', '50%', {}],
-                                [CMD.VFX, 1600, 'void_particles', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1600, 'rgba(139, 0, 255, 1)', 'shake'],
-
-                                // Phase 13: MAXIMUM CHARGE - WHITE FLASH
-                                [CMD.VFX, 1750, 'particle_storm', '50%', '50%', {}],
-                                [CMD.VFX, 1750, 'energy_tornado', '50%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 1800, 'rgba(255, 255, 255, 1)', 'shake'],
-
-                                // Phase 14: BEAM RELEASE
-                                [CMD.VFX, 1850, 'purple_beam', '50%', '50%', {}, 'beam'],
-                                [CMD.VFX, 1850, 'particle_storm', '50%', '50%', {}],
-                                [CMD.MOVE_VFX, 1880, 'beam', '95%', '50%', 700],
-                                [CMD.IMPACT_FRAME, 1880, 'rgba(139, 0, 255, 1)', 'blur'],
-
-                                // Phase 15: PURPLE FLASH DURING TRAVEL
-                                [CMD.IMPACT_FRAME, 2000, 'rgba(106, 13, 173, 0.8)', 'chromatic'],
-
-                                // Phase 16: BEAM TRAVEL
-                                [CMD.VFX, 2100, 'distortion_wave', '65%', '50%', {}],
-                                [CMD.VFX, 2250, 'distortion_wave', '80%', '50%', {}],
-                                [CMD.VFX, 2400, 'particle_storm', '85%', '50%', {}],
-
-                                // Phase 17: PURPLE FLASH
-                                [CMD.IMPACT_FRAME, 2500, 'rgba(139, 0, 255, 1)', 'shake'],
-
-                                // Phase 18: IMPACT - SOLID WHITE
-                                [CMD.IMPACT_FRAME, 2580, 'rgba(255, 255, 255, 1)', 'shake'],
-                                [CMD.VFX, 2580, 'apocalypse', '95%', '50%', {}],
-                                [CMD.VFX, 2580, 'apocalypse', '95%', '50%', {}],
-
-                                // Phase 19: BLACK FLASH
-                                [CMD.IMPACT_FRAME, 2613, 'rgba(0, 0, 0, 1)', 'invert'],
-
-                                // Phase 20: PURPLE FLASH
-                                [CMD.IMPACT_FRAME, 2646, 'rgba(139, 0, 255, 1)', 'shake'],
-
-                                // Phase 21: WHITE FLASH
-                                [CMD.IMPACT_FRAME, 2680, 'rgba(255, 255, 255, 1)', 'shake'],
-
-                                // Phase 22: PURPLE EXPLOSION WAVES
-                                [CMD.VFX, 2720, 'apocalypse', '95%', '50%', {}],
-                                [CMD.VFX, 2720, 'distortion_wave', '95%', '50%', {}],
-                                [CMD.VFX, 2720, 'particle_storm', '95%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 2750, 'rgba(139, 0, 255, 1)', 'chromatic'],
-
-                                // Phase 23: BLACK FLASH
-                                [CMD.IMPACT_FRAME, 2850, 'rgba(0, 0, 0, 1)', 'invert'],
-
-                                // Phase 24: PURPLE FLASH
-                                [CMD.IMPACT_FRAME, 2883, 'rgba(106, 13, 173, 1)', 'shake'],
-
-                                // Phase 25: FINAL WHITE FLASH
-                                [CMD.IMPACT_FRAME, 2916, 'rgba(255, 255, 255, 1)', 'shake'],
-
-                                // Phase 26: PURPLE SHOCKWAVES
-                                [CMD.VFX, 2950, 'distortion_wave', '95%', '50%', {}],
-                                [CMD.VFX, 3050, 'distortion_wave', '75%', '50%', {}],
-                                [CMD.VFX, 3150, 'distortion_wave', '55%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 3200, 'rgba(139, 0, 255, 0.7)', 'chromatic'],
-
-                                // Phase 27: FADE OUT
-                                [CMD.VFX, 3400, 'particle_storm', '95%', '50%', {}],
-                                [CMD.IMPACT_FRAME, 3600, 'rgba(139, 0, 255, 0.3)', 'none'],
-                                [CMD.IMPACT_FRAME, 3800, 'transparent', 'none'],
-                                [CMD.WAIT, 500]
+                                // Phase 11: FADE
+                                [CMD.WAIT, 1000],
+                                [CMD.IMPACT_FRAME, 4500, 'transparent', 'none']
                         ];
 
                         fx.runSequence(sequence).then(function () {
                                 btn.classList.remove('hidden');
+                                shrineBtn.classList.remove('hidden');
                                 title.classList.remove('visible');
                         });
                 }
 
+                // --- MALEVOLENT SHRINE EFFECTS ---
+
+                // SHRINE OUTLINE - The ominous structure
+                fx.registerEffect('shrine_outline', function (inst) {
+                        inst.emitter = function () {
+                                // Torii Gate / Shrine Structure
+                                // Top bar
+                                for (let i = 0; i < 40; i++) {
+                                        inst.spawn({
+                                                x: (i - 20) * 15,
+                                                y: -150,
+                                                vx: 0, vy: 0,
+                                                life: 60, size: 8, color: '#8b0000',
+                                                type: 'triangle'
+                                        });
+                                }
+                                // Pillars
+                                for (let i = 0; i < 30; i++) {
+                                        inst.spawn({ x: -200, y: -150 + i * 15, vx: 0, vy: 0, life: 60, size: 6, color: '#500000' });
+                                        inst.spawn({ x: 200, y: -150 + i * 15, vx: 0, vy: 0, life: 60, size: 6, color: '#500000' });
+                                }
+                                // Eyes/Teeth particles
+                                if (Math.random() > 0.8) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 300,
+                                                y: (Math.random() - 0.5) * 300,
+                                                vx: 0, vy: -2,
+                                                life: 40, size: 4, color: '#ff0000'
+                                        });
+                                }
+                        };
+                });
+
+                // CLEAVE - Single powerful slash
+                fx.registerEffect('cleave_slash', function (inst) {
+                        inst.emitter = function () {
+                                const angle = Math.PI / 4; // Diagonal
+                                for (let i = 0; i < 20; i++) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 50,
+                                                y: (Math.random() - 0.5) * 50,
+                                                vx: Math.cos(angle) * 30,
+                                                vy: Math.sin(angle) * 30,
+                                                life: 10,
+                                                size: 2,
+                                                length: 100,
+                                                width: 4,
+                                                color: '#ffffff',
+                                                type: 'line',
+                                                rotation: angle
+                                        });
+                                }
+                        };
+                });
+
+                // DISMANTLE - Rapid intersecting slashes
+                fx.registerEffect('dismantle_slash', function (inst) {
+                        inst.emitter = function () {
+                                for (let k = 0; k < 3; k++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        for (let i = 0; i < 10; i++) {
+                                                inst.spawn({
+                                                        x: (Math.random() - 0.5) * 100,
+                                                        y: (Math.random() - 0.5) * 100,
+                                                        vx: Math.cos(angle) * 40,
+                                                        vy: Math.sin(angle) * 40,
+                                                        life: 8,
+                                                        size: 1,
+                                                        length: 150,
+                                                        width: 2,
+                                                        color: '#ff0000',
+                                                        type: 'line',
+                                                        rotation: angle
+                                                });
+                                        }
+                                }
+                        };
+                });
+
+                // BLOOD MIST
+                fx.registerEffect('blood_mist', function (inst) {
+                        inst.emitter = function () {
+                                for (let i = 0; i < 20; i++) {
+                                        inst.spawn({
+                                                x: (Math.random() - 0.5) * 800,
+                                                y: (Math.random() - 0.5) * 800,
+                                                vx: (Math.random() - 0.5) * 2,
+                                                vy: (Math.random() - 0.5) * 2,
+                                                life: 60,
+                                                size: 2 + Math.random() * 4,
+                                                color: '#8b0000',
+                                                shrink: true
+                                        });
+                                }
+                        };
+                });
+
+                // DOMAIN EXPANSION RING
+                fx.registerEffect('domain_expansion_ring', function (inst) {
+                        let radius = 0;
+                        inst.emitter = function () {
+                                radius += 20;
+                                if (radius > 1000) return;
+                                for (let i = 0; i < 60; i++) {
+                                        const angle = (Math.PI * 2 * i) / 60;
+                                        inst.spawn({
+                                                x: Math.cos(angle) * radius,
+                                                y: Math.sin(angle) * radius,
+                                                vx: Math.cos(angle) * 5,
+                                                vy: Math.sin(angle) * 5,
+                                                life: 30,
+                                                size: 10,
+                                                color: '#ff0000'
+                                        });
+                                }
+                        };
+                });
+
+                function activateMalevolentShrine() {
+                        btn.classList.add('hidden');
+                        shrineBtn.classList.add('hidden');
+
+                        const originalTitle = title.innerText;
+                        title.innerText = "伏 魔 御 廚 子"; // Malevolent Shrine
+                        title.style.color = "#ff0000";
+                        title.style.textShadow = "0 0 20px #8b0000";
+                        title.classList.add('visible');
+
+                        const sequence = [
+                                // Phase 1: Domain Expansion
+                                [CMD.IMPACT_FRAME, 0, 'rgba(0, 0, 0, 0.8)', 'none'],
+                                [CMD.VFX, 0, 'domain_expansion_ring', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 500, 'rgba(50, 0, 0, 0.5)', 'rumble'],
+
+                                // Phase 2: Shrine Manifests
+                                [CMD.VFX, 1000, 'shrine_outline', '50%', '60%', {}],
+                                [CMD.VFX, 1000, 'blood_mist', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 1000, 'rgba(255, 0, 0, 0.2)', 'shake'],
+
+                                // Phase 3: Dismantle (Rapid Slashes)
+                                [CMD.VFX, 2000, 'dismantle_slash', '50%', '50%', {}],
+                                [CMD.VFX, 2100, 'dismantle_slash', '40%', '40%', {}],
+                                [CMD.VFX, 2200, 'dismantle_slash', '60%', '60%', {}],
+                                [CMD.VFX, 2300, 'dismantle_slash', '30%', '70%', {}],
+                                [CMD.VFX, 2400, 'dismantle_slash', '70%', '30%', {}],
+                                [CMD.IMPACT_FRAME, 2400, 'rgba(255, 0, 0, 0.4)', 'shake'],
+
+                                // Phase 4: Cleave (Heavy Hits)
+                                [CMD.VFX, 2800, 'cleave_slash', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 2800, 'rgba(255, 255, 255, 0.8)', 'shake'],
+                                [CMD.VFX, 3000, 'cleave_slash', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 3000, 'rgba(255, 255, 255, 0.8)', 'shake'],
+
+                                // Phase 5: ONSLAUGHT
+                                [CMD.VFX, 3500, 'dismantle_slash', '50%', '50%', {}],
+                                [CMD.VFX, 3550, 'dismantle_slash', '50%', '50%', {}],
+                                [CMD.VFX, 3600, 'dismantle_slash', '50%', '50%', {}],
+                                [CMD.VFX, 3650, 'cleave_slash', '50%', '50%', {}],
+                                [CMD.VFX, 3700, 'blood_mist', '50%', '50%', {}],
+                                [CMD.IMPACT_FRAME, 3700, 'rgba(139, 0, 0, 0.6)', 'rumble'],
+
+                                // Phase 6: FINAL CUT
+                                [CMD.IMPACT_FRAME, 4500, 'rgba(0, 0, 0, 1)', 'invert'],
+                                [CMD.WAIT, 200],
+                                [CMD.IMPACT_FRAME, 4700, 'rgba(255, 0, 0, 1)', 'shake'],
+                                [CMD.VFX, 4700, 'cleave_slash', '50%', '50%', { size: 5, length: 2000 }], // Massive slash
+                                [CMD.VFX, 4700, 'blood_mist', '50%', '50%', {}],
+
+                                // Phase 7: Aftermath
+                                [CMD.IMPACT_FRAME, 5000, 'rgba(50, 0, 0, 0.8)', 'none'],
+                                [CMD.VFX, 5000, 'shrine_outline', '50%', '60%', {}], // Shrine fades
+                                [CMD.WAIT, 1000],
+                                [CMD.IMPACT_FRAME, 6000, 'transparent', 'none']
+                        ];
+
+                        fx.runSequence(sequence).then(function () {
+                                btn.classList.remove('hidden');
+                                shrineBtn.classList.remove('hidden');
+                                title.classList.remove('visible');
+                                // Reset title style after delay
+                                setTimeout(() => {
+                                        title.innerText = originalTitle;
+                                        title.style.color = "";
+                                        title.style.textShadow = "";
+                                }, 1000);
+                        });
+                }
+
                 btn.addEventListener('click', activateHollowPurple);
+                shrineBtn.addEventListener('click', activateMalevolentShrine);
 
                 console.log('💜 HOLLOW PURPLE READY - INFINITE POWER');
         </script>

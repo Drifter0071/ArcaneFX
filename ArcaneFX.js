@@ -4,7 +4,7 @@
  */
 
 // ============================================================================
-// ｧｱ SEQUENCE COMMANDS
+// SEQUENCE COMMANDS
 // ============================================================================
 export const SEQUENCE_COMMANDS = {
         VFX: 'VFX', // [COMMAND, delay, name, x, y, options, STORAGE_KEY]
@@ -18,7 +18,7 @@ export const SEQUENCE_COMMANDS = {
 };
 
 // ============================================================================
-// ｧ CORE ENGINE
+// CORE ENGINE
 // ============================================================================
 export class ArcaneFX {
         constructor() {
@@ -324,7 +324,7 @@ class SequenceRunner {
 }
 
 // ============================================================================
-// ｧﾁ EFFECT INSTANCE (VFX Lifecycle)
+// EFFECT INSTANCE (VFX Lifecycle)
 // ============================================================================
 class EffectInstance {
         constructor(ctx, w, h, container, x, y, opts) {
