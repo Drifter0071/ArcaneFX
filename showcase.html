@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ArcaneFX | High Fidelity VFX</title>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap"
+                rel="stylesheet">
+</head>
+
+<body>
+
+        <div class="container">
+
+                <header class="header">
+                        <div class="logo-area">
+                                <h1>ARCANE<span class="highlight">FX</span></h1>
+                                <p class="subtitle">Next-Gen Particle Engine</p>
+                        </div>
+                </header>
+
+                <div class="controls-area">
+
+                        <div class="control-group main-actions">
+                                <div class="input-wrapper">
+                                        <label>Selected Effect</label>
+                                        <select id="effectSelect">
+                                        </select>
+                                </div>
+
+                                <div class="button-group">
+                                        <button id="spawnEffect" class="btn primary">Spawn</button>
+                                        <button id="clearEffects" class="btn danger">Clear All</button>
+                                </div>
+                        </div>
+
+                        <div class="control-group demo-actions">
+                                <label>Sequences</label>
+                                <div class="button-group">
+                                        <button id="playDemo" class="btn secondary">Hero Demo</button>
+                                        <button id="testSequence" class="btn secondary">Test Seq</button>
+                                        <button id="showAllEffects" class="btn secondary">Show All</button>
+                                </div>
+                        </div>
+
+                        <div class="control-group sliders">
+                                <div class="slider-wrapper">
+                                        <label>Position X <span id="positionXValue"
+                                                        class="value-display">50%</span></label>
+                                        <input type="range" id="positionX" min="0" max="100" value="50">
+                                </div>
+                                <div class="slider-wrapper">
+                                        <label>Position Y <span id="positionYValue"
+                                                        class="value-display">50%</span></label>
+                                        <input type="range" id="positionY" min="0" max="100" value="50">
+                                </div>
+                        </div>
+                </div>
+
+                <div id="effectsGrid" class="effects-grid">
+                </div>
+
+        </div>
+
+        <div class="perf-monitor">
+                <div class="stat-row">
+                        <span class="label">FPS</span>
+                        <span id="fpsCounter" class="value">60</span>
+                </div>
+                <div class="stat-row">
+                        <span class="label">Particles</span>
+                        <span id="totalParticles" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                        <span class="label">Active FX</span>
+                        <span id="activeEffects" class="value">0</span>
+                </div>
+                <div class="stat-row">
+                        <span class="label">Res</span>
+                        <span id="canvasSize" class="value">--</span>
+                </div>
+        </div>
+
+        <div class="instructions">
+                Click anywhere to spawn • Click cards to test
+        </div>
+
+        <script type="module" src="showcase.js"></script>
+</body>
+
+</html>
