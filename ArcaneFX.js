@@ -37,7 +37,6 @@ export class ArcaneFX {
                 this.dpr = window.devicePixelRatio || 1;
 
                 this.init();
-                this.registerCoreEffects();
         }
 
         init() {
