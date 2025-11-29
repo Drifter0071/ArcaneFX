@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+        <meta charset="utf-8">
+        <title>Vinyl Player</title>
+        <style>
+                body {
+                        margin: 0;
+                        background: #111;
+                        overflow: hidden;
+                }
+        </style>
+</head>
+
+<body>
+        <script src="vinyl-player.js"></script>
+        <script>
+                const player = new AudioPlayer({
+                        corner: 'bottom-left',
+                        theme: 'dark',
+                        accentColor: '#1db954'
+                });
+
+                // Optional: add real audio later like:
+                // player.play('my-song.mp3');
+                // player.playSfx('beep.mp3');
+        </script>
+</body>
+
+</html>
